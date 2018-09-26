@@ -1,5 +1,6 @@
 pub mod duck {
    // use std::collections::HashMap;
+   use std::ops::Add;
 
 //    pub struct DataFrame {
 //        pub data: HashMap<&'static str, Vec<&'static str>>,
@@ -41,7 +42,7 @@ pub mod duck {
             let mut count: usize = 0;
             let shape: usize = 1;
 
-            for (_, it) in arr.iter().enumerate() {
+            for it in arr.iter() {
                 self.data.data.push(*it);
                 count += 1;
             }
@@ -55,6 +56,8 @@ pub mod duck {
     pub struct Matrix {
         pub nd_array: Vec<Column>,
         pub size: usize,
+        pub columns: usize,
+        pub rows: usize,
     }
 
     impl Matrix {
@@ -67,6 +70,8 @@ pub mod duck {
             Matrix {
                 nd_array: data,
                 size,
+                columns: 0,
+                rows: 0,
             }
         }
         pub fn data(&self) -> Vec<Vec<u32>> {
@@ -79,13 +84,22 @@ pub mod duck {
         pub fn size(&self) -> usize {
             self.size
         }
-        pub fn shape(&self) -> u32 {
-            1
+        pub fn shape(&self) -> String {
+            format!("{}x{}", self.columns, self.rows)
         }
         pub fn d_type(&self) -> &'static str {
             "u32"
         }
     }
+
+    impl Add for Matrix {
+        type Output = Matrix;
+
+        fn add(self, rhs: Matrix) -> <Self as Add<Matrix>>::Output {
+            unimplemented!()
+        }
+    }
+
     pub struct Vector {
         pub data: Column,
     }
@@ -110,6 +124,22 @@ pub mod duck {
             self.data.data.d_type
         }
     }
+
+    fn mean(vec: &Vec<i32>) -> f64 {
+        let sum: i32 = vec.iter().sum();
+        sum as f64 / vec.len() as f64
+    }
+
+    fn median(vec: &mut Vec<i32>) -> f64 {
+        vec.sort();
+        let mid = vec.len() / 2;
+        if vec.len() % 2 == 0 {
+            mean(&vec![vec[mid - 1], vec[mid]])
+        } else {
+            vec[mid] as f64
+        }
+    }
+
 
 //    impl Duck {
 //        pub fn new() -> Self {
