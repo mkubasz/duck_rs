@@ -74,6 +74,11 @@ pub mod duck {
                 rows: 0,
             }
         }
+        // 
+        //    Problem referencji do referencji tablicy
+        //    Problem z typowaniem T -> [1,2,3] 
+        //    
+        //
         pub fn data(&self) -> Vec<Vec<u32>> {
            let mut vec: Vec<Vec<u32>> = Vec::new();
             for i in self.nd_array.iter() {
