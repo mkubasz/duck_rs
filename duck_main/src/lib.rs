@@ -1,173 +1,91 @@
-pub mod duck {
-   // use std::collections::HashMap;
-   use std::ops::Add;
+use rustlearn::prelude::*;
+use rustlearn::linear_models::sgdclassifier::Hyperparameters;
+use rustlearn::datasets::iris;
+use std::fs::File;
+use csv::{ReaderBuilder};
+use ndarray::Array;
+use std::error::Error;
+use std::path::Path;
+use std::env;
+use std::any::Any;
+use std::ops::IndexMut;
+use std::borrow::Borrow;
 
-//    pub struct DataFrame {
-//        pub data: HashMap<&'static str, Vec<&'static str>>,
-//    }
+#[derive(Debug)]
+pub struct Element {
+    value: String
+}
 
-    pub struct NDArray {
-        pub data: Vec<u32>,
-        pub size: usize,
-        pub d_type: &'static str,
-        pub shape: usize,
-    }
+#[derive(Debug)]
+pub struct Column {
+    pub data: Vec<Element>
+}
 
-    impl NDArray {
-        pub fn new() -> Self {
-            NDArray {
-                data: Vec::new(),
-                size: 0,
-                d_type: "int64",
-                shape: 0}
+impl Column {
+    fn new() -> Column {
+        Column {
+            data: Vec::new()
         }
     }
 
-//    pub struct Duck {
-//        nd_array: NDArray
-//    }
-
-    pub struct Column {
-        pub data: NDArray,
+    fn push(&mut self, element: Element) {
+        self.data.push(element);
     }
+}
 
-    impl Column {
-        pub fn new(data: &[u32]) -> Self {
-            let mut c =  Column{data: NDArray::new()};
-            c.column(data);
-            c
-        }
-        pub fn column(&mut self, arr: &[u32])
-        {
-            let mut count: usize = 0;
-            let shape: usize = 1;
+#[derive(Debug)]
+struct DataFrame {
+    label: Vec<String>,
+    data: Vec<Column>
+}
 
-            for it in arr.iter() {
-                self.data.data.push(*it);
-                count += 1;
-            }
-
-
-            self.data.size = count;
-            self.data.shape = shape;
+impl DataFrame {
+    fn new() -> DataFrame {
+        DataFrame {
+            label: Vec::new(),
+            data: Vec::new()
         }
     }
 
-    pub struct Matrix {
-        pub nd_array: Vec<Column>,
-        pub size: usize,
-        pub columns: usize,
-        pub rows: usize,
-    }
-
-    impl Matrix {
-        pub fn new(data: Vec<Column>) -> Self {
-            let mut size: usize = 0;
-            for i in data.iter() {
-                size += i.data.data.len();
-            }
-
-            Matrix {
-                nd_array: data,
-                size,
-                columns: 0,
-                rows: 0,
-            }
-        }
-        // 
-        //    Problem referencji do referencji tablicy
-        //    Problem z typowaniem T -> [1,2,3] 
-        //    
-        //
-        pub fn data(&self) -> Vec<Vec<u32>> {
-           let mut vec: Vec<Vec<u32>> = Vec::new();
-            for i in self.nd_array.iter() {
-                vec.push(i.data.data.clone())
-            }
-            vec
-        }
-        pub fn size(&self) -> usize {
-            self.size
-        }
-        pub fn shape(&self) -> String {
-            format!("{}x{}", self.columns, self.rows)
-        }
-        pub fn d_type(&self) -> &'static str {
-            "u32"
+    fn push(&mut self, element: Vec<Element>) {
+        for (i, el) in element.iter().enumerate() {
+            self.data[i].push(Element {
+                value: el.value.clone()
+            });
         }
     }
 
-    impl Add for Matrix {
-        type Output = Matrix;
-
-        fn add(self, rhs: Matrix) -> <Self as Add<Matrix>>::Output {
-            unimplemented!()
-        }
-    }
-
-    pub struct Vector {
-        pub data: Column,
-    }
-
-    impl Vector {
-        pub fn new(data: &[u32]) -> Self {
-            Vector {
-                data: Column::new(data)
-            }
-        }
-
-        pub fn data(&self) -> &Vec<u32> {
-            &self.data.data.data
-        }
-        pub fn size(&self) -> usize {
-            self.data.data.size
-        }
-        pub fn shape(&self) -> usize {
-            self.data.data.shape
-        }
-        pub fn d_type(&self) -> &'static str {
-            self.data.data.d_type
-        }
-    }
-
-    fn mean(vec: &Vec<i32>) -> f64 {
-        let sum: i32 = vec.iter().sum();
-        sum as f64 / vec.len() as f64
-    }
-
-    fn median(vec: &mut Vec<i32>) -> f64 {
-        vec.sort();
-        let mid = vec.len() / 2;
-        if vec.len() % 2 == 0 {
-            mean(&vec![vec[mid - 1], vec[mid]])
-        } else {
-            vec[mid] as f64
-        }
-    }
-
-
-//    impl Duck {
-//        pub fn new() -> Self {
-//            //Duck { }
+    fn by(&mut self, label: &str) -> &mut Column {
+//        for (i, el) in label {
+//            if
 //        }
-//
-//
-//
-//        pub fn array(&mut self, arr: Vec<Row>) -> &NDArray
-//        {
-//            let mut count: usize = 0;
-//            let shape: usize = 1;
-//
-//            for (_, it) in arr.iter().enumerate() {
-//                self.nd_array.data.push((**it)[0]);
-//                count += 1;
-//            }
-//
-//
-//            self.nd_array.size = count;
-//            self.nd_array.shape = shape;
-//            &self.nd_array
-//        }
-//    }
+        let index = self.label.clone().into_iter().find(|el| el == label );
+        &mut self.data[0]
+    }
+}
 
+
+pub fn read() -> Result<(), Box<dyn Error>> {
+    let path = env::current_dir()?;
+    println!("{:?}", path);
+    let mut file = File::open("src/Startups.csv")?;
+
+    let mut rdr = csv::Reader::from_reader(file);
+    let mut df = DataFrame::new();
+    for header in rdr.headers() {
+        for el in header.iter() {
+            df.label.push(el.to_string());
+        }
+    }
+    for result in rdr.records(){
+        let mut row =Vec::new();
+        let record = result?;
+        for el in record.iter() {
+            row.push(Element {value: el.to_string() });
+        }
+        df.push(row);
+    }
+    print!("{:?}", df);
+    let unique = df.by("State");
+    Ok(())
 }
