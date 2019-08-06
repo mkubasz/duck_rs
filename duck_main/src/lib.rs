@@ -11,12 +11,12 @@ use std::any::Any;
 use std::ops::IndexMut;
 use std::borrow::Borrow;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Element {
     value: String
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Column {
     pub data: Vec<Element>
 }
@@ -29,21 +29,22 @@ impl Column {
     }
 
     fn push(&mut self, element: Element) {
+
         self.data.push(element);
     }
 }
 
 #[derive(Debug)]
-struct DataFrame {
+pub struct DataFrame {
     label: Vec<String>,
     data: Vec<Column>
 }
 
 impl DataFrame {
-    fn new() -> DataFrame {
+    pub fn new(size: usize) -> DataFrame {
         DataFrame {
             label: Vec::new(),
-            data: Vec::new()
+            data: vec![Column::new(); size]
         }
     }
 
@@ -55,37 +56,31 @@ impl DataFrame {
         }
     }
 
-    fn by(&mut self, label: &str) -> &mut Column {
-//        for (i, el) in label {
-//            if
-//        }
-        let index = self.label.clone().into_iter().find(|el| el == label );
-        &mut self.data[0]
+    pub fn by(&mut self, label: &str) -> &mut Column {
+        let index = self.label.clone().iter().position(|el| el == label ).unwrap();
+        &mut self.data[index]
     }
-}
+    pub fn read_csv(file_name: String) -> Result<(DataFrame), Box<dyn Error>> {
+        let path = env::current_dir()?;
+        println!("{:?}", path);
+        let mut file = File::open(file_name)?;
 
-
-pub fn read() -> Result<(), Box<dyn Error>> {
-    let path = env::current_dir()?;
-    println!("{:?}", path);
-    let mut file = File::open("src/Startups.csv")?;
-
-    let mut rdr = csv::Reader::from_reader(file);
-    let mut df = DataFrame::new();
-    for header in rdr.headers() {
-        for el in header.iter() {
-            df.label.push(el.to_string());
+        let mut rdr = csv::Reader::from_reader(file);
+        let mut df = DataFrame::new(rdr.headers().unwrap().len());
+        for header in rdr.headers() {
+            for el in header.iter() {
+                df.label.push(el.to_string());
+            }
         }
-    }
-    for result in rdr.records(){
-        let mut row =Vec::new();
-        let record = result?;
-        for el in record.iter() {
-            row.push(Element {value: el.to_string() });
+        for result in rdr.records(){
+            let mut row =Vec::new();
+            let record = result?;
+            for el in record.iter() {
+                row.push(Element {value: el.to_string() });
+            }
+            df.push(row);
         }
-        df.push(row);
+        print!("{:?}", df);
+        Ok(df)
     }
-    print!("{:?}", df);
-    let unique = df.by("State");
-    Ok(())
 }
