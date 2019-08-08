@@ -14,7 +14,6 @@
   <component name="ChangeListManager">
     <list default="true" id="63b67e37-b1aa-4887-ae58-1792a8635540" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
@@ -130,7 +129,7 @@
       <workItem from="1562319999537" duration="54000" />
       <workItem from="1562320066877" duration="306000" />
       <workItem from="1565126107865" duration="5594000" />
-      <workItem from="1565283233449" duration="14153000" />
+      <workItem from="1565283233449" duration="22355000" />
     </task>
     <task id="LOCAL-00001" summary="New way to handle matrix and vector">
       <created>1537566937993</created>
@@ -167,17 +166,15 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/main.rs</url>
-          <line>9</line>
-          <option name="timeStamp" value="9" />
+          <line>28</line>
+          <option name="timeStamp" value="33" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/main.rs</url>
+          <line>29</line>
+          <option name="timeStamp" value="34" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="CargoCommandRunConfiguration">
-        <watch expression="it" />
-        <watch expression="t" />
-        <watch expression="m" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>
