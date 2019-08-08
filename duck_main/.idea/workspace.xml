@@ -14,6 +14,7 @@
   <component name="ChangeListManager">
     <list default="true" id="63b67e37-b1aa-4887-ae58-1792a8635540" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.rs" afterDir="false" />
     </list>
@@ -46,7 +47,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1537039223296" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/exercism/rust/nth-prime" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
@@ -128,7 +129,8 @@
       <workItem from="1557183685581" duration="1416000" />
       <workItem from="1562319999537" duration="54000" />
       <workItem from="1562320066877" duration="306000" />
-      <workItem from="1565126107865" duration="2497000" />
+      <workItem from="1565126107865" duration="5594000" />
+      <workItem from="1565283233449" duration="14153000" />
     </task>
     <task id="LOCAL-00001" summary="New way to handle matrix and vector">
       <created>1537566937993</created>
@@ -148,7 +150,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
@@ -172,6 +176,7 @@
       <configuration name="CargoCommandRunConfiguration">
         <watch expression="it" />
         <watch expression="t" />
+        <watch expression="m" />
       </configuration>
     </watches-manager>
   </component>

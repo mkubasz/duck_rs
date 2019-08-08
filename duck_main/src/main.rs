@@ -1,12 +1,12 @@
 use rustlearn::prelude::*;
 use rustlearn::linear_models::sgdclassifier::Hyperparameters;
 use rustlearn::datasets::iris;
-use duck_main::DataFrame;
+use duck_main::{DataFrame, Element};
 
 fn main() {
-    let (X, y) = iris::load_data();
     let mut df = DataFrame::read_csv(format!("src/Startups.csv")).unwrap();
-    let unique = df.by("State");
+    let dummies = df.get_dummies("State");
+    let mut new_df = df.concat(dummies).drop("State");
     let mut model = Hyperparameters::new(4)
         .learning_rate(1.0)
         .l2_penalty(0.5)
@@ -16,5 +16,5 @@ fn main() {
     model.fit(&X, &y).unwrap();
 
     let prediction = model.predict(&X).unwrap();
-    //println!("{:?}", prediction);
+    println!("{:?}", prediction);
 }
