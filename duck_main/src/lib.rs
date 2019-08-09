@@ -9,7 +9,6 @@ use rustlearn::array::dense::ArrayIterator;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct Element {
-    label: String,
     value: String
 }
 
@@ -20,12 +19,14 @@ impl Element {
 
 #[derive(Debug, Clone)]
 pub struct Column {
+    label: String,
     pub data: Vec<Element>
 }
 
 impl Column {
     fn new() -> Column {
         Column {
+            label: "".to_string(),
             data: Vec::new()
         }
     }
@@ -88,7 +89,6 @@ impl DataFrame {
     fn push(&mut self, element: Vec<Element>) {
         for (i, el) in element.iter().enumerate() {
             self.data[i].push(Element {
-                label: el.label.clone(),
                 value: el.value.clone()
             });
         }
@@ -138,7 +138,7 @@ impl DataFrame {
         let mut df = DataFrame::new(size);
         for (_, columns) in vec.iter().enumerate() {
             for (index, value) in columns.iter().enumerate() {
-                df.data[index].push(Element { label: labels.data[index].value.clone(), value: format!("{}", value)});
+                df.data[index].push(Element { value: format!("{}", value)});
             }
         }
         df
@@ -146,6 +146,9 @@ impl DataFrame {
 
     pub fn add_labels(&mut self, labels: Vec<String>) -> &DataFrame {
         self.labels = labels.clone();
+        for (index, label) in labels.iter().enumerate() {
+            self.data[index].label = label.clone();
+        }
         self
     }
 
@@ -167,16 +170,18 @@ impl DataFrame {
 
         let mut rdr = csv::Reader::from_reader(file);
         let mut df = DataFrame::new(rdr.headers().unwrap().len());
+        let mut vec = Vec::new();
         for header in rdr.headers() {
             for el in header.iter() {
-                df.labels.push(el.to_string());
+                vec.push(el.to_string())
             }
         }
+        df.add_labels(vec);
         for result in rdr.records(){
             let mut row =Vec::new();
             let record = result?;
             for (index, el) in record.iter().enumerate() {
-                row.push(Element {label: df.labels[index].clone(), value: el.to_string() });
+                row.push(Element { value: el.to_string() });
             }
             df.push(row);
         }
