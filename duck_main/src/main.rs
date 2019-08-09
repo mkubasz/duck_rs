@@ -6,7 +6,13 @@ use rustlearn::trees::decision_tree;
 fn main() {
     let mut df = DataFrame::read_csv(format!("src/Startups.csv")).unwrap();
     let y = df.by("Profit").clone();
-    let mut X = df.idx_drop(4);
+    let mut X: DataFrame;
+    let many = df.many(vec!["Profit", "State"]);
+    if let Some(_x) = df.drop_idx(4) {
+        X = _x;
+    } else {
+        return;
+    }
     let dummies = X.get_dummies("State");
     X = X.concat(dummies).drop("State");
     let X = &Array::from(&X.values());

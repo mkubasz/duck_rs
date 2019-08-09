@@ -25,7 +25,6 @@ impl Column {
 
     pub fn values(&self) -> Array1<f32> {
         let mut arr = Array::default(self.data.len());
-
         for (index, element) in self.data.iter().enumerate() {
             arr[index] = element.value.parse().unwrap();
         }
@@ -42,7 +41,9 @@ impl Column {
             unique_values.insert(e.clone());
         });
         let mut column = Column::new();
-        unique_values.iter().for_each(|el| column.data.push(el.clone()) );
+        unique_values.iter().for_each(
+            |el| column.data.push(el.clone())
+        );
         column
     }
 
@@ -87,14 +88,17 @@ impl DataFrame {
     }
 
     pub fn by(&mut self, label: &str) -> &mut Column {
-        let index = self.labels.clone().iter().position(|el| el == label ).unwrap();
+        let index = self.labels.clone().iter().position(|
+            el| el == label
+        ).unwrap();
         &mut self.data[index]
     }
 
-//    pub fn many(&mut self, labels: Vec<String>) -> &mut DataFrame {
-//        let indexes = self.labels.clone().iter().positions(|el| labels.contains(el) ).unwrap();
-//        &mut self.data[indexes]
-//    }
+    pub fn many(&mut self, labels: Vec<&str>) -> Vec<Column> {
+        self.data.clone().into_iter().filter(|p| {
+            labels.contains(&p.label.as_str())
+        }).collect::<Vec<Column>>()
+    }
 
     pub fn get_dummies(&mut self, label: &str) -> DataFrame {
         let column = self.by(label);
@@ -102,28 +106,41 @@ impl DataFrame {
         let size = unique_column.clone().len();
         let columns = column.data.iter().map(|el| {
             let mut tmp = vec![0;size];
-            let index = unique_column.data.iter().position(|it| it.value == el.value).unwrap();
+            let index = unique_column.data.iter().position(
+                |it| it.value == el.value
+            ).unwrap();
             tmp[index] = 1;
             tmp
         }).collect();
         let mut df = Self::from_vec(columns, size);
-        df.add_labels(unique_column.data.iter().map(|el| el.value.clone()).collect());
+        df.add_labels(unique_column.data.iter().map(
+            |el| el.value.clone()
+        ).collect());
         df
     }
     pub fn concat(&mut self, df: DataFrame) -> DataFrame {
-        DataFrame{ labels: [&self.labels[..], &df.labels[..]].concat(), data: [&self.data[..], &df.data[..]].concat() }
+        DataFrame {
+            labels: [&self.labels[..], &df.labels[..]].concat(),
+            data: [&self.data[..], &df.data[..]].concat()
+        }
     }
 
     pub fn drop(&mut self, label: &str) -> DataFrame {
-        let position = self.labels.clone().iter().position(|el| el == label ).unwrap();
+        let position = self.labels.clone().iter().position(
+            |el| el == label
+        ).unwrap();
         self.labels.remove(position);
         self.data.remove(position);
         self.to_owned()
     }
-    pub fn idx_drop(&mut self, position: usize) -> DataFrame {
+
+    pub fn drop_idx(&mut self, position: usize) -> Option<DataFrame> {
+        if self.labels.len() < position {
+            return None;
+        }
         self.labels.remove(position);
         self.data.remove(position);
-        self.to_owned()
+        Some(self.to_owned())
     }
 
     pub fn from_vec(vec: Vec<Vec<i32>>, size: usize)-> DataFrame {
