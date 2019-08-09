@@ -72,6 +72,16 @@ impl IndexMut<usize> for DataFrame {
     }
 }
 
+
+impl Index<&str> for DataFrame {
+    type Output = Column;
+    fn index(&self, i: &str) -> &Self::Output {
+        &self.data.iter().find(|p| {
+            p.label == i.to_string()
+        }).unwrap()
+    }
+}
+
 impl DataFrame {
     pub fn new(size: usize, vec: Option<Vec<Vec<String>>>) -> DataFrame {
         DataFrame {
@@ -89,6 +99,7 @@ impl DataFrame {
         }
     }
 
+
     pub fn by(&mut self, label: &str) -> &mut Column {
         let index = self.labels.clone().iter().position(|
             el| el == label
@@ -104,7 +115,7 @@ impl DataFrame {
 
     pub fn get_dummies(&mut self, label: &str) -> DataFrame {
         let column = self.by(label);
-        let unique_column = column.unique();
+        let unique_column = column.clone().unique();
         let size = unique_column.clone().len();
         let columns = column.data.iter().map(|el| {
             let mut tmp = vec![0;size];
@@ -156,6 +167,12 @@ impl DataFrame {
         df
     }
 
+    pub fn to_vec(&self) -> Vec<Vec<f32>> {
+        let mut arr = vec![vec![0.0;self.labels.len()];self.data[0].data.len()];
+        self.for_each(&mut arr);
+        arr
+    }
+
     pub fn add_labels(&mut self, labels: Vec<String>) -> &DataFrame {
         self.labels = labels.clone();
         for (index, label) in labels.iter().enumerate() {
@@ -165,14 +182,19 @@ impl DataFrame {
     }
 
     pub fn values(&self) -> Vec<Vec<f32>> {
-        //let mut arr = Array::default((self.labels.len(), self.data.len()));
         let mut arr = vec![vec![0.0;self.labels.len()];self.data[0].data.len()];
-        for (i, columns) in self.data.iter().enumerate() {
-            for (j, el) in columns.data.iter().enumerate() {
-                arr[j][i] = el.value.parse().unwrap();
+
+//        let mut arr = Array::default((self.labels.len(), self.data.len()));
+        self.for_each(&mut arr);
+        arr
+    }
+
+    fn for_each(&self, arr: &mut Vec<Vec<f32>>) {
+        for (col, column) in self.data.iter().enumerate() {
+            for (row, el) in column.data.iter().enumerate() {
+                arr[col][row] = el.value.parse().unwrap();
             }
         }
-        arr
     }
 
     pub fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
