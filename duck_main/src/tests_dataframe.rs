@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
     use super::*;
-    use duck_main::DataFrame;
     use std::any::Any;
+    use duck_main::dataframe::DataFrame;
 
     #[test]
     fn test_create_dataframe() {

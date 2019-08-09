@@ -1,7 +1,8 @@
 use rustlearn::prelude::*;
 use rustlearn::linear_models::sgdclassifier::Hyperparameters;
-use duck_main::DataFrame;
 use rustlearn::trees::decision_tree;
+use duck_main::dataframe::DataFrame;
+
 pub mod tests_dataframe;
 
 fn main() {
