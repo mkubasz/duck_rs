@@ -2,6 +2,7 @@ use rustlearn::prelude::*;
 use rustlearn::linear_models::sgdclassifier::Hyperparameters;
 use duck_main::DataFrame;
 use rustlearn::trees::decision_tree;
+pub mod tests_dataframe;
 
 fn main() {
     let mut df = DataFrame::read_csv(format!("src/Startups.csv")).unwrap();

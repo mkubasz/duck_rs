@@ -54,6 +54,7 @@ impl Column {
 
 #[derive(Debug, Clone)]
 pub struct DataFrame {
+    pub size: usize,
     labels: Vec<String>,
     data: Vec<Column>
 }
@@ -72,8 +73,9 @@ impl IndexMut<usize> for DataFrame {
 }
 
 impl DataFrame {
-    pub fn new(size: usize) -> DataFrame {
+    pub fn new(size: usize, vec: Option<Vec<Vec<String>>>) -> DataFrame {
         DataFrame {
+            size,
             labels: Vec::new(),
             data: vec![Column::new(); size]
         }
@@ -120,6 +122,7 @@ impl DataFrame {
     }
     pub fn concat(&mut self, df: DataFrame) -> DataFrame {
         DataFrame {
+            size: 0,
             labels: [&self.labels[..], &df.labels[..]].concat(),
             data: [&self.data[..], &df.data[..]].concat()
         }
@@ -144,7 +147,7 @@ impl DataFrame {
     }
 
     pub fn from_vec(vec: Vec<Vec<i32>>, size: usize)-> DataFrame {
-        let mut df = DataFrame::new(size);
+        let mut df = DataFrame::new(size, None);
         for (_, columns) in vec.iter().enumerate() {
             for (index, value) in columns.iter().enumerate() {
                 df.data[index].push(Element { value: format!("{}", value)});
@@ -175,7 +178,7 @@ impl DataFrame {
     pub fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
         let file = File::open(file_name)?;
         let mut rdr = csv::Reader::from_reader(file);
-        let mut df = DataFrame::new(rdr.headers().unwrap().len());
+        let mut df = DataFrame::new(rdr.headers().unwrap().len(), None);
         let mut vec = Vec::new();
         for header in rdr.headers() {
             for el in header.iter() {
