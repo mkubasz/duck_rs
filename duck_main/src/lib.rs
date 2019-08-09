@@ -1,20 +1,12 @@
 use std::fs::File;
 use std::error::Error;
-use std::env;
 use std::collections::HashSet;
-use std::borrow::{Borrow, BorrowMut};
-use ndarray::prelude::*;
 use std::ops::{Index, IndexMut};
-use rustlearn::array::dense::ArrayIterator;
+use ndarray::prelude::*;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct Element {
     value: String
-}
-
-impl Element {
-    fn push() {
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -114,7 +106,7 @@ impl DataFrame {
             tmp[index] = 1;
             tmp
         }).collect();
-        let mut df = Self::from_vec(columns, size, unique_column.clone());
+        let mut df = Self::from_vec(columns, size);
         df.add_labels(unique_column.data.iter().map(|el| el.value.clone()).collect());
         df
     }
@@ -134,7 +126,7 @@ impl DataFrame {
         self.to_owned()
     }
 
-    pub fn from_vec(vec: Vec<Vec<i32>>, size: usize, labels: Column)-> DataFrame {
+    pub fn from_vec(vec: Vec<Vec<i32>>, size: usize)-> DataFrame {
         let mut df = DataFrame::new(size);
         for (_, columns) in vec.iter().enumerate() {
             for (index, value) in columns.iter().enumerate() {
@@ -164,10 +156,7 @@ impl DataFrame {
     }
 
     pub fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
-        let path = env::current_dir()?;
-        println!("{:?}", path);
-        let mut file = File::open(file_name)?;
-
+        let file = File::open(file_name)?;
         let mut rdr = csv::Reader::from_reader(file);
         let mut df = DataFrame::new(rdr.headers().unwrap().len());
         let mut vec = Vec::new();
@@ -180,7 +169,7 @@ impl DataFrame {
         for result in rdr.records(){
             let mut row =Vec::new();
             let record = result?;
-            for (index, el) in record.iter().enumerate() {
+            for el in record.iter() {
                 row.push(Element { value: el.to_string() });
             }
             df.push(row);

@@ -1,7 +1,6 @@
 use rustlearn::prelude::*;
 use rustlearn::linear_models::sgdclassifier::Hyperparameters;
-use rustlearn::datasets::iris;
-use duck_main::{DataFrame, Element};
+use duck_main::DataFrame;
 use rustlearn::trees::decision_tree;
 
 fn main() {
@@ -20,12 +19,5 @@ fn main() {
         .one_vs_rest();
 
     model.fit(X, y).unwrap();
-
-// Optionally serialize and deserialize the model
-
-// let encoded = bincode::serialize(&model).unwrap();
-// let decoded: OneVsRestWrapper<RandomForest> = bincode::deserialize(&encoded).unwrap();
-
-    let prediction = model.predict(X).unwrap();
-    let a = 4;
+    model.predict(X).unwrap();
 }
