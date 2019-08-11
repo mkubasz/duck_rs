@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use std::ops::{Index, IndexMut};
 use ndarray::prelude::*;
 
-// Basic elementary cell in data frame
+/// Basic elementary cell in data frame
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct Element {
     value: String
@@ -24,7 +24,7 @@ impl Column {
         }
     }
 
-    // Convert Data Frame to ndarray
+    /// Convert Data Frame to ndarray
     pub fn values(&self) -> Array1<f32> {
         let mut arr = Array::default(self.data.len());
         for (index, element) in self.data.iter().enumerate() {
@@ -37,7 +37,7 @@ impl Column {
         self.data.push(element);
     }
 
-    // Get unique values in columns
+    /// Get unique values in columns
     pub fn unique(&mut self) -> Column {
         let mut unique_values = HashSet::new();
         self.data.iter().for_each(|e| {
@@ -102,7 +102,7 @@ impl DataFrame {
         }
     }
 
-    // Get selected column by using label name
+    /// Get selected column by using label name
     pub fn by(&mut self, label: &str) -> &mut Column {
         let index = self.labels.clone().iter().position(|
             el| el == label
@@ -110,14 +110,14 @@ impl DataFrame {
         &mut self.data[index]
     }
 
-    // Get selected columns by using labels name
+    /// Get selected columns by using labels name
     pub fn many(&mut self, labels: Vec<&str>) -> Vec<Column> {
         self.data.clone().into_iter().filter(|p| {
             labels.contains(&p.label.as_str())
         }).collect::<Vec<Column>>()
     }
 
-    // One hot encoding - Convert string values to binary value
+    /// One hot encoding - Convert string values to binary value
     pub fn get_dummies(&mut self, label: &str) -> DataFrame {
         let column = self.by(label);
         let unique_column = column.clone().unique();
@@ -137,7 +137,7 @@ impl DataFrame {
         df
     }
 
-    // Concatenate two data frames
+    /// Concatenate two data frames
     pub fn concat(&mut self, df: DataFrame) -> DataFrame {
         DataFrame {
             size: 0,
@@ -146,7 +146,7 @@ impl DataFrame {
         }
     }
 
-    // Drop column by label from Data Frame
+    /// Drop column by label from Data Frame
     pub fn drop(&mut self, label: &str) -> DataFrame {
         let position = self.labels.clone().iter().position(
             |el| el == label
@@ -156,7 +156,7 @@ impl DataFrame {
         self.to_owned()
     }
 
-    // Drop column by position from Data Frame
+    /// Drop column by position from Data Frame
     pub fn drop_idx(&mut self, position: usize) -> Option<DataFrame> {
         if self.labels.len() < position {
             return None;
@@ -193,7 +193,7 @@ impl DataFrame {
     pub fn values(&self) -> Vec<Vec<f32>> {
         let mut arr = vec![vec![0.0;self.labels.len()];self.data[0].data.len()];
 
-//        let mut arr = Array::default((self.labels.len(), self.data.len()));
+        // let mut arr = Array::default((self.labels.len(), self.data.len()));
         self.for_each(&mut arr);
         arr
     }
