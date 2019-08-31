@@ -3,6 +3,7 @@ mod tests {
     use super::*;
     use std::any::Any;
     use duck_main::dataframe::DataFrame;
+    use duck_main::dataframe::DataFrameImpl;
 
     #[test]
     fn test_create_dataframe() {

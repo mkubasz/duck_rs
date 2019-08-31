@@ -1,13 +1,23 @@
 use std::fs::File;
 use std::error::Error;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use std::ops::{Index, IndexMut};
 use ndarray::prelude::*;
+use std::convert::From;
+use num_traits::Num;
+use std::any::Any;
+use std::borrow::{Borrow, BorrowMut};
 
 // Basic elementary cell in data frame
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct Element {
     value: String
+}
+
+impl Element {
+    fn replace(&mut self, new: String) {
+        self.value = new;
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +47,13 @@ impl Column {
         self.data.push(element);
     }
 
+    // fn convert<T: Num>(&self) -> Column {
+    //     let col = self.data.into_iter().map(|p|
+    //         Element::<T>{ value: T::from(p.value) }
+    //     ).collect::();
+    //     col
+    // }
+
     // Get unique values in columns
     pub fn unique(&mut self) -> Column {
         let mut unique_values = HashSet::new();
@@ -62,6 +79,30 @@ pub struct DataFrame {
     data: Vec<Column>
 }
 
+pub trait DataFrameImpl {
+    fn new(size: usize, vec: Option<Vec<Vec<String>>>) -> DataFrame;
+    fn push(&mut self, element: Vec<Element>);
+    // Get selected column by using label name
+    fn by(&mut self, label: &str) -> &mut Column;
+    // Get selected columns by using labels name
+    fn many(&mut self, labels: Vec<&str>) -> Vec<Column>;
+    fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame;
+    // One hot encoding - Convert string values to binary value
+    fn get_dummies(&mut self, label: &str) -> DataFrame;
+    // Concatenate two data frames
+    fn concat(&mut self, df: DataFrame) -> DataFrame;
+    // Drop column by label from Data Frame
+    fn drop(&mut self, label: Vec<&str>) -> Option<DataFrame>;
+    // Drop column by position from Data Frame
+    fn drop_idx(&mut self, position: usize) -> Option<DataFrame>;
+    fn from_vec(vec: Vec<Vec<i32>>, size: usize)-> DataFrame ;
+    fn to_vec(&self) -> Vec<Vec<f32>>;
+    fn add_labels(&mut self, labels: Vec<String>) -> &DataFrame;
+    fn values(&self) -> Vec<Vec<f32>>;
+    fn for_each(&self, arr: &mut Vec<Vec<f32>>);
+    fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>>;
+}
+
 impl Index<usize> for DataFrame {
     type Output = Column;
     fn index(&self, i: usize) -> &Self::Output {
@@ -85,8 +126,8 @@ impl Index<&str> for DataFrame {
     }
 }
 
-impl DataFrame {
-    pub fn new(size: usize, vec: Option<Vec<Vec<String>>>) -> DataFrame {
+impl DataFrameImpl for DataFrame {
+    fn new(size: usize, vec: Option<Vec<Vec<String>>>) -> DataFrame {
         DataFrame {
             size,
             labels: Vec::new(),
@@ -103,7 +144,7 @@ impl DataFrame {
     }
 
     // Get selected column by using label name
-    pub fn by(&mut self, label: &str) -> &mut Column {
+    fn by(&mut self, label: &str) -> &mut Column {
         let index = self.labels.clone().iter().position(|
             el| el == label
         ).unwrap();
@@ -111,14 +152,26 @@ impl DataFrame {
     }
 
     // Get selected columns by using labels name
-    pub fn many(&mut self, labels: Vec<&str>) -> Vec<Column> {
+    fn many(&mut self, labels: Vec<&str>) -> Vec<Column> {
         self.data.clone().into_iter().filter(|p| {
             labels.contains(&p.label.as_str())
         }).collect::<Vec<Column>>()
     }
 
+    fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame {
+        for el in &mut self.by(col).data {
+            for (key, v) in obj.iter() {
+                if *key == el.value.as_str() {
+                    el.replace(format!("{}", v));
+                    break;
+                }
+            }
+        }
+        self.to_owned()
+    }
+
     // One hot encoding - Convert string values to binary value
-    pub fn get_dummies(&mut self, label: &str) -> DataFrame {
+    fn get_dummies(&mut self, label: &str) -> DataFrame {
         let column = self.by(label);
         let unique_column = column.clone().unique();
         let size = unique_column.clone().len();
@@ -138,7 +191,7 @@ impl DataFrame {
     }
 
     // Concatenate two data frames
-    pub fn concat(&mut self, df: DataFrame) -> DataFrame {
+    fn concat(&mut self, df: DataFrame) -> DataFrame {
         DataFrame {
             size: 0,
             labels: [&self.labels[..], &df.labels[..]].concat(),
@@ -147,17 +200,20 @@ impl DataFrame {
     }
 
     // Drop column by label from Data Frame
-    pub fn drop(&mut self, label: &str) -> DataFrame {
-        let position = self.labels.clone().iter().position(
-            |el| el == label
-        ).unwrap();
-        self.labels.remove(position);
-        self.data.remove(position);
-        self.to_owned()
+    fn drop(&mut self, labels: Vec<&str>) -> Option<DataFrame> {
+        for label in labels {
+            let position = self.labels.clone().iter().position(
+                |el| el == label
+            ).unwrap();
+            self.labels.remove(position);
+            self.data.remove(position);
+        }
+        let a = self.to_owned();
+        Some(a)
     }
 
     // Drop column by position from Data Frame
-    pub fn drop_idx(&mut self, position: usize) -> Option<DataFrame> {
+    fn drop_idx(&mut self, position: usize) -> Option<DataFrame> {
         if self.labels.len() < position {
             return None;
         }
@@ -166,7 +222,7 @@ impl DataFrame {
         Some(self.to_owned())
     }
 
-    pub fn from_vec(vec: Vec<Vec<i32>>, size: usize)-> DataFrame {
+    fn from_vec(vec: Vec<Vec<i32>>, size: usize)-> DataFrame {
         let mut df = DataFrame::new(size, None);
         for (_, columns) in vec.iter().enumerate() {
             for (index, value) in columns.iter().enumerate() {
@@ -176,13 +232,13 @@ impl DataFrame {
         df
     }
 
-    pub fn to_vec(&self) -> Vec<Vec<f32>> {
+    fn to_vec(&self) -> Vec<Vec<f32>> {
         let mut arr = vec![vec![0.0;self.labels.len()];self.data[0].data.len()];
         self.for_each(&mut arr);
         arr
     }
 
-    pub fn add_labels(&mut self, labels: Vec<String>) -> &DataFrame {
+    fn add_labels(&mut self, labels: Vec<String>) -> &DataFrame {
         self.labels = labels.clone();
         for (index, label) in labels.iter().enumerate() {
             self.data[index].label = label.clone();
@@ -190,7 +246,7 @@ impl DataFrame {
         self
     }
 
-    pub fn values(&self) -> Vec<Vec<f32>> {
+    fn values(&self) -> Vec<Vec<f32>> {
         let mut arr = vec![vec![0.0;self.labels.len()];self.data[0].data.len()];
 
 //        let mut arr = Array::default((self.labels.len(), self.data.len()));
@@ -201,12 +257,19 @@ impl DataFrame {
     fn for_each(&self, arr: &mut Vec<Vec<f32>>) {
         for (col, column) in self.data.iter().enumerate() {
             for (row, el) in column.data.iter().enumerate() {
-                arr[col][row] = el.value.parse().unwrap();
+                match el.value.parse() {
+                    Ok(num) => {
+                        arr[row][col] = num;
+                    },
+                    Err(_) => {
+                        arr[row][col] = 0.0;
+                    },
+                }
             }
         }
     }
 
-    pub fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
+    fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
         let file = File::open(file_name)?;
         let mut rdr = csv::Reader::from_reader(file);
         let mut df = DataFrame::new(rdr.headers().unwrap().len(), None);
