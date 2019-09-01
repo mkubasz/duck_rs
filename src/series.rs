@@ -1,17 +1,6 @@
 use ndarray::{Array1, Array};
 use std::collections::HashSet;
-
-/// Basic elementary cell in data frame
-#[derive(Hash, Eq, PartialEq, Debug, Clone)]
-pub struct Element {
-    pub value: String
-}
-
-impl Element {
-    pub fn replace(&mut self, new: String) {
-        self.value = new;
-    }
-}
+use crate::element::Element;
 
 #[derive(Debug, Clone)]
 pub struct Series {
@@ -19,8 +8,16 @@ pub struct Series {
     pub data: Vec<Element>
 }
 
-impl Series {
-    pub fn new() -> Series {
+pub trait SeriesImpl {
+    fn new() -> Series;
+    fn values(&self) -> Array1<f32>;
+    fn push(&mut self, element: Element);
+    fn unique(&mut self) -> Series;
+    fn len(self) -> usize;
+}
+
+impl SeriesImpl for Series {
+    fn new() -> Series {
         Series {
             label: "".to_string(),
             data: Vec::new()
@@ -28,7 +25,7 @@ impl Series {
     }
 
     /// Convert Data Frame to ndarray
-    pub fn values(&self) -> Array1<f32> {
+    fn values(&self) -> Array1<f32> {
         let mut arr = Array::default(self.data.len());
         for (index, element) in self.data.iter().enumerate() {
             arr[index] = element.value.parse().unwrap();
@@ -36,7 +33,7 @@ impl Series {
         arr
     }
 
-    pub fn push(&mut self, element: Element) {
+    fn push(&mut self, element: Element) {
         self.data.push(element);
     }
 
@@ -48,7 +45,7 @@ impl Series {
     // }
 
     /// Get unique values in columns
-    pub fn unique(&mut self) -> Series {
+    fn unique(&mut self) -> Series {
         let mut unique_values = HashSet::new();
         self.data.iter().for_each(|e| {
             unique_values.insert(e.clone());
@@ -60,7 +57,7 @@ impl Series {
         column
     }
 
-    pub fn len(self) -> usize {
+    fn len(self) -> usize {
         self.data.len()
     }
 }

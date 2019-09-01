@@ -2,7 +2,7 @@
 
 mod tests {
     use crate::dataframe::{DataFrame, DataFrameImpl};
-    
+
     #[test]
     fn test_create_dataframe() {
         let df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();

@@ -3,7 +3,8 @@ use std::error::Error;
 use std::fs::File;
 use std::ops::{Index, IndexMut};
 
-use crate::series::{Element, Series};
+use crate::series::{Series, SeriesImpl};
+use crate::element::{Element, ElementImpl};
 
 #[derive(Debug, Clone)]
 pub struct DataFrame {
