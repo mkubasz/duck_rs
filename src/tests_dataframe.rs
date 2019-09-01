@@ -1,14 +1,12 @@
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use std::any::Any;
-    use duck_main::dataframe::DataFrame;
-    use duck_main::dataframe::DataFrameImpl;
 
+mod tests {
+    use crate::dataframe::{DataFrame, DataFrameImpl};
+    
     #[test]
     fn test_create_dataframe() {
         let df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
-        let mut profit = df["Profit"].clone();
+        let profit = df["Profit"].clone();
         assert_eq!(df.size, 5);
     }
 

@@ -1,13 +1,7 @@
-use std::any::Any;
-use std::borrow::{Borrow, BorrowMut};
 use std::collections::HashMap;
-use std::convert::From;
 use std::error::Error;
 use std::fs::File;
 use std::ops::{Index, IndexMut};
-
-use ndarray::prelude::*;
-use num_traits::Num;
 
 use crate::series::{Element, Series};
 
