@@ -1,5 +1,5 @@
 [package]
-name = "duck_main"
+name = "duck"
 version = "0.1.0"
 authors = ["mkubasz <mkubasz@gmail.com>"]
 edition = "2018"
