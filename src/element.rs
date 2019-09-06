@@ -13,6 +13,9 @@ impl Element {
     pub fn data_type(&self) -> DataTypes {
         match self {
             Element::Text(_) => DataTypes::Text,
+            Element::Integer(_) => DataTypes::Integer,
+            Element::Float(_) => DataTypes::Float,
+            Element::Bool(_) => DataTypes::Bool,
             _ => DataTypes::Text
         }
     }
