@@ -2,6 +2,7 @@
 
 mod tests {
     use crate::dataframe::{DataFrame, DataFrameImpl};
+    use std::ops::Deref;
 
     #[test]
     fn test_create_dataframe_from_vec() {
@@ -32,8 +33,20 @@ mod tests {
     #[test]
     fn test_create_from_csv_dataframe() {
         let df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
-        //let profit = df["Profit"].clone();
         assert_eq!(df.size, 50);
     }
 
+    #[test]
+    fn test_read_by() {
+        let mut df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
+        let series = df.by("Profit");
+        assert_eq!(series.label, "Profit".to_string());
+    }
+
+    #[test]
+    fn test_read_many() {
+        let mut df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
+        let series = df.many(vec!["Profit", "State"]);
+        assert_eq!(series.len(), 2);
+    }
 }

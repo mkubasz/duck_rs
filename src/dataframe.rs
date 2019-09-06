@@ -20,6 +20,12 @@ pub struct DataFrame {
 pub trait DataFrameImpl {
     fn new(vec: Vec<Vec<Element>>, labels: Vec<&str>) -> DataFrame;
     fn push(&mut self, element: Vec<Element>);
+    fn series(&mut self, index:  usize) -> &mut Series;
+    /// Get selected column by using label name
+    fn by(&mut self, label: &str) -> &mut Series;
+    /// Get selected column by using label name
+    fn many(&mut self, labels: Vec<&str>) -> Vec<Series>;
+    fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame;
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>>;
 }
 
@@ -85,6 +91,41 @@ impl DataFrameImpl for DataFrame {
             }
             self.size += 1;
         }
+    }
+
+    fn series(&mut self, index: usize) -> &mut Series {
+        match &mut self.data[index] {
+            TSeries::Text(col) => col
+        }
+    }
+
+    fn by(&mut self, label: &str) -> &mut Series {
+        let index = self.labels.clone().iter()
+            .position(|el| el == label)
+            .unwrap();
+        self.series((index).to_owned())
+    }
+
+    fn many(&mut self, labels: Vec<&str>) -> Vec<Series> {
+        let mut vec: Vec<Series> = Vec::new();
+        for index in 0..self.data.len() {
+            let series = self.series(index).clone();
+            if labels.contains(&series.label.as_str()) {
+                vec.push(series.to_owned());
+            }
+        }
+        vec
+    }
+
+    fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame {
+        for el in &mut self.by(col).data {
+            for (key, v) in obj.iter() {
+                if *key == el.as_str() {
+                    break;
+                }
+            }
+        }
+        self.to_owned()
     }
 
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
