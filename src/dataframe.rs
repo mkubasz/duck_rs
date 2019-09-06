@@ -29,6 +29,12 @@ pub trait DataFrameImpl {
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>>;
 }
 
+pub trait DataFrameScienceImpl {
+    /// One hot encoding - Convert string values to binary value
+    fn get_dummies(&mut self, label: &str) -> DataFrame;
+    fn from_vec(vec: Vec<Vec<i32>>, labels: Vec<&str>) -> DataFrame;
+}
+
 impl DataFrameImpl for DataFrame {
     fn new(vec: Vec<Vec<Element>>, labels: Vec<&str>) -> DataFrame {
         let mut column_types = vec![];
@@ -89,8 +95,8 @@ impl DataFrameImpl for DataFrame {
                 },
                 _=> {},
             }
-            self.size += 1;
         }
+        self.size += 1;
     }
 
     fn series(&mut self, index: usize) -> &mut Series {
@@ -121,6 +127,7 @@ impl DataFrameImpl for DataFrame {
         for el in &mut self.by(col).data {
             for (key, v) in obj.iter() {
                 if *key == el.as_str() {
+                    *el = format!("{}", v);
                     break;
                 }
             }
@@ -149,5 +156,66 @@ impl DataFrameImpl for DataFrame {
             }
         }
         Ok(DataFrame::new(vec, labels.clone()))
+    }
+}
+
+impl Index<&str> for DataFrame {
+    type Output = Series;
+
+    fn index(&self, label: &str) -> &Self::Output {
+        for col in &self.data {
+            match col {
+                TSeries::Text(c) => {
+                    if c.label == label {
+                        return &c;
+                    }
+                }
+            }
+        }
+        panic!("unknown column name")
+    }
+}
+
+impl Index<usize> for DataFrame {
+    type Output = Series;
+    fn index(&self, i: usize) -> &Self::Output {
+        match &self.data[i] {
+            TSeries::Text(col) => col
+        }
+    }
+}
+
+impl IndexMut<usize> for DataFrame {
+    fn index_mut(&mut self, i: usize) -> &mut Self::Output {
+        self.series(i)
+    }
+}
+
+impl DataFrameScienceImpl for DataFrame {
+    fn get_dummies(&mut self, label: &str) -> DataFrame {
+        let column = self.by(label);
+        let unique_column = column.clone().unique();
+        let size = unique_column.clone().data.len();
+        let columns: Vec<Vec<Element>> = column.data.iter().map(|el| {
+            let mut tmp = vec![Element::Integer(0); size];
+            let index = unique_column.data.iter().position(
+                |it| it == el
+            ).unwrap();
+            tmp[index] = Element::Integer(1);
+            tmp
+        }).collect();
+        let mut df = DataFrame::new(columns, vec!["a"]);
+        df
+    }
+
+    fn from_vec(vec: Vec<Vec<i32>>, labels: Vec<&str>) -> DataFrame {
+        let mut new_vec = DataFrame::new(vec![], labels);
+//        for (_, columns) in vec.iter().enumerate() {
+//            for (index, value) in columns.iter().enumerate() {
+//                new_vec.data[index]. (Element::Integer(*value));
+//
+//            }
+//        }
+        new_vec
     }
 }

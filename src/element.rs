@@ -1,7 +1,7 @@
 use crate::types::{DInteger, DFloat, DataTypes};
 
 /// Basic elementary cell in data frame
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Element {
     Text(String),
     Integer(i32),
