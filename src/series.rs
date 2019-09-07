@@ -12,6 +12,7 @@ pub trait SeriesImpl {
     fn new() -> Series<Element>;
     //fn push(&mut self, element: Element);
     fn unique(&mut self) -> Series<Element>;
+    fn contains(self, label: &str) -> bool;
 //    fn series(&mut self) -> &mut Series<T>;
 }
 
@@ -57,5 +58,19 @@ impl SeriesImpl for Series<Element> {
             |el| column.data.push(Element::from(el.clone()))
         );
         column
+    }
+
+    fn contains(self, label: &str) -> bool {
+        for el in self.data {
+            match el {
+                Element::Text(cell) => {
+                    if cell.contains(label) {
+                        return true
+                    }
+                }
+                _ => {}
+            }
+        }
+        return false
     }
 }

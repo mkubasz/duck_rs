@@ -4,6 +4,7 @@ mod tests {
     use crate::dataframe::{DataFrame, DataFrameImpl, DataFrameScienceImpl};
     use std::ops::Deref;
     use std::collections::HashMap;
+    use crate::series::SeriesImpl;
 
     #[test]
     fn test_create_dataframe_from_vec() {
@@ -72,8 +73,8 @@ mod tests {
         let mut new_keys = HashMap::new();
         new_keys.insert("New York", 0 as u32);
         let mut series = df.map("State", new_keys);
-       // let mut data = series.by("State").data.contains(&format!("{}", 0));
-        assert_eq!(true, true);
+        let mut data = series.by("State").clone().contains("0");
+        assert_eq!(data, true);
     }
 
     #[test]
