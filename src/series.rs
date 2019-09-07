@@ -3,48 +3,58 @@ use std::collections::HashSet;
 use crate::element::Element;
 
 #[derive(Debug, Clone)]
-pub struct Series {
+pub struct Series<T> {
     pub label: String,
-    pub data: Vec<String>
-
+    pub data: Vec<T>
 }
 
 pub trait SeriesImpl {
-    fn new() -> Series;
-    fn push(&mut self, element: Element);
-    fn unique(&mut self) -> Series;
+    fn new() -> Series<Element>;
+    //fn push(&mut self, element: Element);
+    fn unique(&mut self) -> Series<Element>;
+//    fn series(&mut self) -> &mut Series<T>;
 }
 
 #[derive(Debug, Clone)]
 pub enum TSeries {
-    Text(Series),
+    Text(Series<String>),
+    Number(Series<f32>)
 }
 
-impl SeriesImpl for Series {
-    fn new() -> Series {
+impl SeriesImpl for Series<Element> {
+    fn new() -> Series<Element> {
         Series {
             label: "".to_string(),
             data: Vec::new()
         }
     }
+//
+//    fn push(&mut self, element: Element) {
+//        self.data[0].push(element);
+//    }
 
-    fn push(&mut self, element: Element) {
-        match element {
-            Element::Text(val) => self.data.push(val.clone()),
-            Element::Integer(val) => self.data.push(format!("{}", val.clone())),
-            Element::Float(val) => self.data.push(format!("{}", val.clone())),
-            Element::Bool(val) => self.data.push(format!("{}", val.clone())),
-        }
-    }
+//    fn series(&mut self) -> &mut Series<T> {
+//        match self{
+//            Series::<String>(v) => v,
+//            TSeries::Number(v) => v,
+//            _ => {}
+//        }
+//    }
 
-    fn unique(&mut self) -> Series {
-        let mut unique_values = HashSet::new();
+    fn unique(&mut self) -> Series<Element> {
+        let mut unique_values: HashSet<String> = HashSet::new();
         self.data.iter().for_each(|e| {
-            unique_values.insert(e.clone());
+            match e {
+                Element::Text(cell) => {
+                        unique_values.insert(cell.clone());
+                    },
+                _ => {}
+            }
+
         });
         let mut column = Series::new();
         unique_values.iter().for_each(
-            |el| column.data.push(el.clone())
+            |el| column.data.push(Element::from(el.clone()))
         );
         column
     }

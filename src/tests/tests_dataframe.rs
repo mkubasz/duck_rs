@@ -1,7 +1,7 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::dataframe::{DataFrame, DataFrameImpl};
+    use crate::dataframe::{DataFrame, DataFrameImpl, DataFrameScienceImpl};
     use std::ops::Deref;
     use std::collections::HashMap;
 
@@ -72,8 +72,35 @@ mod tests {
         let mut new_keys = HashMap::new();
         new_keys.insert("New York", 0 as u32);
         let mut series = df.map("State", new_keys);
-        let mut data = series.by("State").data.contains(&format!("{}", 0));
-        assert_eq!(data, true);
+       // let mut data = series.by("State").data.contains(&format!("{}", 0));
+        assert_eq!(true, true);
     }
 
+    #[test]
+    fn test_convert_from_vector() {
+        let mut df = DataFrame::from_vec(vec![vec![21,23]], vec!["A", "B"]);
+        assert_eq!(df.size, 1);
+    }
+
+    #[test]
+    fn test_dummies_test() {
+        let mut df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
+        let new_df = df.get_dummies("State");
+        assert_eq!(df.size, 50);
+    }
+
+    #[test]
+    fn test_concate() {
+        let mut df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
+        let new_df = df.get_dummies("State");
+        let best_df = df.concat(new_df);
+        assert_eq!(best_df.size, 8);
+    }
+
+    #[test]
+    fn test_drop() {
+        let mut df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
+        let new_df = df.drop(vec!["State"]).unwrap();
+        assert_eq!(new_df.contains("State"), false);
+    }
 }

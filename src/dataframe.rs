@@ -8,31 +8,40 @@ use crate::element::{Element};
 use criterion::Throughput::Elements;
 use crate::types::DataTypes;
 use std::borrow::Borrow;
-
+use num::{Num, NumCast, PrimInt, Unsigned};
+use num_traits::{Float, Zero, Signed};
+use std::iter::Product;
 
 #[derive(Debug, Clone)]
 pub struct DataFrame {
     pub size: usize,
     labels: Vec<String>,
-    data: Vec<TSeries>,
+    data: Vec<Series<Element>>,
 }
 
 pub trait DataFrameImpl {
     fn new(vec: Vec<Vec<Element>>, labels: Vec<&str>) -> DataFrame;
     fn push(&mut self, element: Vec<Element>);
-    fn series(&mut self, index:  usize) -> &mut Series;
+    fn series(&mut self, index:  usize) -> &mut Series<Element>;
     /// Get selected column by using label name
-    fn by(&mut self, label: &str) -> &mut Series;
+    fn by(&mut self, label: &str) -> &mut Series<Element>;
     /// Get selected column by using label name
-    fn many(&mut self, labels: Vec<&str>) -> Vec<Series>;
+    fn many(&mut self, labels: Vec<&str>) -> Vec<Series<Element>>;
     fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame;
+    /// Concatenate two data frames
+    fn concat(&mut self, df: DataFrame) -> DataFrame;
+    /// Drop column by label from Data Frame
+    fn drop(&mut self, label: Vec<&str>) -> Option<DataFrame>;
+    /// Drop column by position from Data Frame
+    fn drop_idx(&mut self, position: usize) -> Option<DataFrame>;
+    fn contains(self, label: &str) -> bool;
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>>;
 }
 
 pub trait DataFrameScienceImpl {
     /// One hot encoding - Convert string values to binary value
     fn get_dummies(&mut self, label: &str) -> DataFrame;
-    fn from_vec(vec: Vec<Vec<i32>>, labels: Vec<&str>) -> DataFrame;
+    fn from_vec<T>(vec: Vec<Vec<T>>, labels: Vec<&str>) -> DataFrame where T: PrimInt + Signed + Product;
 }
 
 impl DataFrameImpl for DataFrame {
@@ -44,32 +53,24 @@ impl DataFrameImpl for DataFrame {
         }
 
         // create columns based on column types
-        let mut cols = Vec::<TSeries>::new();
+        let mut cols = Vec::<Series<Element>>::new();
         for (i, t) in column_types.iter().enumerate() {
             match t {
-                DataTypes::Text => cols.push(TSeries::Text(Series {
+                DataTypes::Text => cols.push(Series {
                     label: labels[i].to_string(),
                     data: Vec::new(),
-                })),
-                _ => cols.push(TSeries::Text(Series {
+                }),
+                _ => cols.push(Series {
                     label: labels[i].to_string(),
                     data: Vec::new(),
-                })),
+                }),
             }
         }
 
         let mut size = 0;
         for row in vec.iter() {
             for (col_index, cell) in row.iter().enumerate() {
-                match &mut cols[col_index] {
-                    TSeries::Text(col) => match &cell {
-                        Element::Text(val) => col.data.push(val.clone()),
-                        Element::Integer(val) => col.data.push(format!("{}", val.clone())),
-                        Element::Float(val) => col.data.push(format!("{}", val.clone())),
-                        Element::Bool(val) => col.data.push(format!("{}", val.clone())),
-                    },
-                    _=> {},
-                }
+                cols[col_index].data.push(cell.clone());
             }
             size += 1;
         }
@@ -86,34 +87,24 @@ impl DataFrameImpl for DataFrame {
 
     fn push(&mut self, vec: Vec<Element>) {
         for (i, el) in vec.iter().enumerate() {
-                match &mut self.data[i] {
-                TSeries::Text(col) => match &el {
-                    Element::Text(val) => col.data.push(val.clone()),
-                    Element::Integer(val) => col.data.push(format!("{}", val.clone())),
-                    Element::Float(val) => col.data.push(format!("{}", val.clone())),
-                    Element::Bool(val) => col.data.push(format!("{}", val.clone())),
-                },
-                _=> {},
-            }
+            self.data[i].data.push(el.clone());
         }
         self.size += 1;
     }
 
-    fn series(&mut self, index: usize) -> &mut Series {
-        match &mut self.data[index] {
-            TSeries::Text(col) => col
-        }
+    fn series(&mut self, index: usize) -> &mut Series<Element> {
+        &mut self.data[index]
     }
 
-    fn by(&mut self, label: &str) -> &mut Series {
+    fn by(&mut self, label: &str) -> &mut Series<Element> {
         let index = self.labels.clone().iter()
             .position(|el| el == label)
             .unwrap();
         self.series((index).to_owned())
     }
 
-    fn many(&mut self, labels: Vec<&str>) -> Vec<Series> {
-        let mut vec: Vec<Series> = Vec::new();
+    fn many(&mut self, labels: Vec<&str>) -> Vec<Series<Element>> {
+        let mut vec: Vec<Series<Element>> = Vec::new();
         for index in 0..self.data.len() {
             let series = self.series(index).clone();
             if labels.contains(&series.label.as_str()) {
@@ -126,13 +117,52 @@ impl DataFrameImpl for DataFrame {
     fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame {
         for el in &mut self.by(col).data {
             for (key, v) in obj.iter() {
-                if *key == el.as_str() {
-                    *el = format!("{}", v);
-                    break;
+                match el {
+                    Element::Text(cell) => {
+                        if *key == cell {
+                            *el = Element::from(format!("{}", v));
+                            break;
+                        }
+                    }
+                    _ => {}
                 }
+
             }
         }
         self.to_owned()
+    }
+
+    fn concat(&mut self, df: DataFrame) -> DataFrame {
+        DataFrame {
+            size: self.labels.len()+df.labels.len(),
+            labels: [&self.labels[..], &df.labels[..]].concat(),
+            data: [&self.data[..], &df.data[..]].concat(),
+        }
+    }
+
+    fn drop(&mut self, labels: Vec<&str>) -> Option<DataFrame> {
+        for label in labels {
+            let position = self.labels.clone().iter().position(
+                |el| el == label
+            ).unwrap();
+            self.labels.remove(position);
+            self.data.remove(position);
+        }
+        let a = self.to_owned();
+        Some(a)
+    }
+
+    fn drop_idx(&mut self, position: usize) -> Option<DataFrame> {
+        if self.labels.len() < position {
+            return None;
+        }
+        self.labels.remove(position);
+        self.data.remove(position);
+        Some(self.to_owned())
+    }
+
+    fn contains(self, label: &str) -> bool{
+        self.labels.contains(&label.to_string())
     }
 
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
@@ -160,16 +190,12 @@ impl DataFrameImpl for DataFrame {
 }
 
 impl Index<&str> for DataFrame {
-    type Output = Series;
+    type Output = Series<Element>;
 
     fn index(&self, label: &str) -> &Self::Output {
         for col in &self.data {
-            match col {
-                TSeries::Text(c) => {
-                    if c.label == label {
-                        return &c;
-                    }
-                }
+            if col.label == label {
+                return &col;
             }
         }
         panic!("unknown column name")
@@ -177,11 +203,9 @@ impl Index<&str> for DataFrame {
 }
 
 impl Index<usize> for DataFrame {
-    type Output = Series;
+    type Output = Series<Element>;
     fn index(&self, i: usize) -> &Self::Output {
-        match &self.data[i] {
-            TSeries::Text(col) => col
-        }
+        &self.data[i]
     }
 }
 
@@ -193,29 +217,37 @@ impl IndexMut<usize> for DataFrame {
 
 impl DataFrameScienceImpl for DataFrame {
     fn get_dummies(&mut self, label: &str) -> DataFrame {
-        let column = self.by(label);
+        let column = self.by(label.clone());
         let unique_column = column.clone().unique();
         let size = unique_column.clone().data.len();
         let columns: Vec<Vec<Element>> = column.data.iter().map(|el| {
             let mut tmp = vec![Element::Integer(0); size];
+
             let index = unique_column.data.iter().position(
-                |it| it == el
+                |it| *it == *el
             ).unwrap();
             tmp[index] = Element::Integer(1);
             tmp
         }).collect();
-        let mut df = DataFrame::new(columns, vec!["a"]);
+        let mut new_labels = Vec::new();
+        for i in 0..size {
+            let mut temp = format!("{}_{}", label, i);
+            new_labels.push(temp.clone());
+        }
+        let v2: Vec<&str> = new_labels.iter().map(|s| &**s).collect();
+        let mut df = DataFrame::new(columns, v2);
         df
     }
 
-    fn from_vec(vec: Vec<Vec<i32>>, labels: Vec<&str>) -> DataFrame {
-        let mut new_vec = DataFrame::new(vec![], labels);
-//        for (_, columns) in vec.iter().enumerate() {
-//            for (index, value) in columns.iter().enumerate() {
-//                new_vec.data[index]. (Element::Integer(*value));
-//
-//            }
-//        }
-        new_vec
+    fn from_vec<T: NumCast + Copy>(vec: Vec<Vec<T>>, labels: Vec<&str>) -> DataFrame {
+        let mut new_vec: Vec<Vec<Element>> = Vec::new();
+        for columns in vec.iter() {
+            let mut elements: Vec<Element> = Vec::new();
+            for  value in columns.iter() {
+                elements.push(Element::from(num::cast::<_, i32>(*value).unwrap()));
+            }
+            new_vec.push(elements);
+        }
+        DataFrame::new(new_vec.clone(), labels)
     }
 }

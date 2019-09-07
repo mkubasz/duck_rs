@@ -1,7 +1,10 @@
 use crate::types::{DInteger, DFloat, DataTypes};
+use num_traits::{Float, NumCast, ToPrimitive};
+use num::{PrimInt, Signed, Integer};
+use std::iter::Product;
 
 /// Basic elementary cell in data frame
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Element {
     Text(String),
     Integer(i32),
@@ -19,8 +22,23 @@ impl Element {
             _ => DataTypes::Text
         }
     }
+
 }
 
+impl Into<String> for Element {
+    fn into(self) -> String {
+       match self {
+           Element::Text(v) => v,
+           _ => {panic!("Error")}
+       }
+    }
+}
+
+impl Into<u32> for Element {
+    fn into(self) -> u32 {
+        unimplemented!()
+    }
+}
 impl From<String> for Element {
     fn from(v: String) -> Self {
         Element::Text(v)
@@ -33,7 +51,6 @@ impl From<DInteger> for Element {
     }
 }
 
-
 impl From<DFloat> for Element {
     fn from(v: DFloat) -> Self {
         Element::Float(v)
@@ -45,7 +62,6 @@ impl From<bool> for Element {
         Element::Bool(v)
     }
 }
-
 
 impl From<&str> for Element {
     fn from(v: &str) -> Self {
