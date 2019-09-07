@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Enum representing the potential errors that TinyTemplate can encounter."]],"type":[["Result",""]]});

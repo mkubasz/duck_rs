@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["minmax",""],["series_minmax",""]]});

@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `tinytemplate` crate."><meta name="keywords" content="rust, rustlang, rust-lang, tinytemplate"><title>tinytemplate - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../tinytemplate/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate tinytemplate</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all tinytemplate's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'tinytemplate', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/tinytemplate/lib.rs.html#1-219' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>tinytemplate</a></span></h1><div class='docblock'><h2 id="tinytemplate" class="section-header"><a href="#tinytemplate">TinyTemplate</a></h2>
+<p>TinyTemplate is a minimal templating library originally designed for use in <a href="https://github.com/bheisler/criterion.rs">Criterion.rs</a>.
+It deliberately does not provide all of the features of a full-power template engine, but in
+return it provides a simple API, clear templating syntax, decent performance and very few
+dependencies.</p>
+<h2 id="features" class="section-header"><a href="#features">Features</a></h2>
+<p>The most important features are as follows (see the <a href="syntax/index.html">syntax</a> module for full
+details on the template syntax):</p>
+<ul>
+<li>Rendering values - <code>{ myvalue }</code></li>
+<li>Conditionals - <code>{{ if foo }}Foo is true{{ else }}Foo is false{{ endif }}</code></li>
+<li>Loops - <code>{{ for value in row }}{value}{{ endfor }}</code></li>
+<li>Customizable value formatters <code>{{ value | my_formatter }}</code></li>
+<li>Macros <code>{{ call my_template with foo }}</code></li>
+</ul>
+<h2 id="restrictions" class="section-header"><a href="#restrictions">Restrictions</a></h2>
+<p>TinyTemplate was designed with the assumption that the templates are available as static strings,
+either using string literals or the <code>include_str!</code> macro. Thus, it borrows <code>&amp;str</code> slices from the
+template text itself and uses them during the rendering process. Although it is possible to use
+TinyTemplate with template strings loaded at runtime, this is not recommended.</p>
+<p>Additionally, TinyTemplate can only render templates into Strings. If you need to render a
+template directly to a socket or file, TinyTemplate may not be right for you.</p>
+<h2 id="example" class="section-header"><a href="#example">Example</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">serde_derive</span>;
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">tinytemplate</span>;
+
+<span class="kw">use</span> <span class="ident">tinytemplate</span>::<span class="ident">TinyTemplate</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span>;
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Serialize</span>)]</span>
+<span class="kw">struct</span> <span class="ident">Context</span> {
+    <span class="ident">name</span>: <span class="ident">String</span>,
+}
+
+<span class="kw">static</span> <span class="ident">TEMPLATE</span> : <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;Hello {name}!&quot;</span>;
+
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">main</span>() <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;&gt;</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tt</span> <span class="op">=</span> <span class="ident">TinyTemplate</span>::<span class="ident">new</span>();
+    <span class="ident">tt</span>.<span class="ident">add_template</span>(<span class="string">&quot;hello&quot;</span>, <span class="ident">TEMPLATE</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let</span> <span class="ident">context</span> <span class="op">=</span> <span class="ident">Context</span> {
+        <span class="ident">name</span>: <span class="string">&quot;World&quot;</span>.<span class="ident">to_string</span>(),
+    };
+
+    <span class="kw">let</span> <span class="ident">rendered</span> <span class="op">=</span> <span class="ident">tt</span>.<span class="ident">render</span>(<span class="string">&quot;hello&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">context</span>)<span class="question-mark">?</span>;
+    <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">rendered</span>);
+
+    <span class="prelude-val">Ok</span>(())
+}</pre></div>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr class='module-item'><td><a class="mod" href="error/index.html" title='tinytemplate::error mod'>error</a></td><td class='docblock-short'><p>Module containing the error type returned by TinyTemplate if an error occurs.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="syntax/index.html" title='tinytemplate::syntax mod'>syntax</a></td><td class='docblock-short'><p>Documentation of TinyTemplate's template syntax.</p>
+</td></tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table><tr class='module-item'><td><a class="struct" href="struct.TinyTemplate.html" title='tinytemplate::TinyTemplate struct'>TinyTemplate</a></td><td class='docblock-short'><p>The TinyTemplate struct is the entry point for the TinyTemplate library. It contains the
+template and formatter registries and provides functions to render templates as well as to
+register templates and formatters.</p>
+</td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table><tr class='module-item'><td><a class="fn" href="fn.escape.html" title='tinytemplate::escape fn'>escape</a></td><td class='docblock-short'><p>Appends <code>value</code> to <code>output</code>, performing HTML-escaping in the process.</p>
+</td></tr><tr class='module-item'><td><a class="fn" href="fn.format.html" title='tinytemplate::format fn'>format</a></td><td class='docblock-short'><p>The format function is used as the default value formatter for all values unless the user
+specifies another. It is provided publicly so that it can be called as part of custom formatters.
+Values are formatted as follows:</p>
+</td></tr><tr class='module-item'><td><a class="fn" href="fn.format_unescaped.html" title='tinytemplate::format_unescaped fn'>format_unescaped</a></td><td class='docblock-short'><p>Identical to <a href="fn.format.html"><code>format</code></a> except that this does not perform HTML escaping.</p>
+</td></tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table><tr class='module-item'><td><a class="type" href="type.ValueFormatter.html" title='tinytemplate::ValueFormatter type'>ValueFormatter</a></td><td class='docblock-short'><p>Type alias for closures which can be used as value formatters.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../";window.currentCrate = "tinytemplate";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>
