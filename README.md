@@ -3,6 +3,10 @@
 In this moment we start creating DataFrame.
 We want to use ndarray as some numpy alternative and nalgebra as mathematic part of coding.
 
+#### Ducky's math:
+  
+  - minmax
+
 In first step:
 Algorithms: Evaluation Methods, Evaluation Metrics, Baseline Models.
 
