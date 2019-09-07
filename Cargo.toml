@@ -3,6 +3,12 @@ name = "duck"
 version = "0.1.0"
 authors = ["mkubasz <mkubasz@gmail.com>"]
 edition = "2018"
+repository = "https://github.com/mkubasz/duck_rs"
+homepage = "https://github.com/mkubasz/duck_rs"
+license = "MIT"
+description = "Duck is implementation in Rust Machine Learning Library and Pandas port."
+keywords = ["machine learning", "data science", "dataframe", "pandas", "neural network"]
+categories = ["data science", "science"]
 
 [dependencies]
 rustlearn = '0.5.0'
