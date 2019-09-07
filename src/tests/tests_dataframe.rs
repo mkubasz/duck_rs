@@ -41,7 +41,7 @@ mod tests {
     #[test]
     fn test_read_by() {
         let mut df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
-        let series = df.by("Profit");
+        let series = df.by("Profit").unwrap();
         assert_eq!(series.label, "Profit".to_string());
     }
 
@@ -73,7 +73,7 @@ mod tests {
         let mut new_keys = HashMap::new();
         new_keys.insert("New York", 0 as u32);
         let mut series = df.map("State", new_keys);
-        let mut data = series.by("State").clone().contains("0");
+        let mut data = series.by("State").unwrap().clone().contains("0");
         assert_eq!(data, true);
     }
 

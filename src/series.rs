@@ -1,6 +1,7 @@
 use ndarray::{Array1, Array};
 use std::collections::HashSet;
 use crate::element::Element;
+use crate::types::{DInteger, DFloat};
 
 #[derive(Debug, Clone)]
 pub struct Series<T> {
@@ -10,16 +11,17 @@ pub struct Series<T> {
 
 pub trait SeriesImpl {
     fn new() -> Series<Element>;
-    //fn push(&mut self, element: Element);
+    fn push(&mut self, element: Element);
     fn unique(&mut self) -> Series<Element>;
     fn contains(self, label: &str) -> bool;
-//    fn series(&mut self) -> &mut Series<T>;
 }
 
 #[derive(Debug, Clone)]
 pub enum TSeries {
     Text(Series<String>),
-    Number(Series<f32>)
+    Number(Series<DInteger>),
+    Float(Series<DFloat>),
+    Bool(Series<bool>)
 }
 
 impl SeriesImpl for Series<Element> {
@@ -29,18 +31,10 @@ impl SeriesImpl for Series<Element> {
             data: Vec::new()
         }
     }
-//
-//    fn push(&mut self, element: Element) {
-//        self.data[0].push(element);
-//    }
 
-//    fn series(&mut self) -> &mut Series<T> {
-//        match self{
-//            Series::<String>(v) => v,
-//            TSeries::Number(v) => v,
-//            _ => {}
-//        }
-//    }
+    fn push(&mut self, element: Element) {
+        self.data.push(element);
+    }
 
     fn unique(&mut self) -> Series<Element> {
         let mut unique_values: HashSet<String> = HashSet::new();

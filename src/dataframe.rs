@@ -24,7 +24,7 @@ pub trait DataFrameImpl {
     fn push(&mut self, element: Vec<Element>);
     fn series(&mut self, index:  usize) -> &mut Series<Element>;
     /// Get selected column by using label name
-    fn by(&mut self, label: &str) -> &mut Series<Element>;
+    fn by(&mut self, label: &str) -> Option<&mut Series<Element>>;
     /// Get selected column by using label name
     fn many(&mut self, labels: Vec<&str>) -> Vec<Series<Element>>;
     fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame;
@@ -60,6 +60,10 @@ impl DataFrameImpl for DataFrame {
                     label: labels[i].to_string(),
                     data: Vec::new(),
                 }),
+                DataTypes::Float => cols.push(Series {
+                    label: labels[i].to_string(),
+                    data: Vec::new(),
+                }),
                 _ => cols.push(Series {
                     label: labels[i].to_string(),
                     data: Vec::new(),
@@ -70,7 +74,14 @@ impl DataFrameImpl for DataFrame {
         let mut size = 0;
         for row in vec.iter() {
             for (col_index, cell) in row.iter().enumerate() {
-                cols[col_index].data.push(cell.clone());
+                match cell {
+                    Element::Float(c) => {
+                        cols[col_index].data.push(cell.clone());
+                    }
+                    _ => {
+                        cols[col_index].data.push(cell.clone());
+                    }
+                }
             }
             size += 1;
         }
@@ -96,11 +107,11 @@ impl DataFrameImpl for DataFrame {
         &mut self.data[index]
     }
 
-    fn by(&mut self, label: &str) -> &mut Series<Element> {
+    fn by(&mut self, label: &str) -> Option<&mut Series<Element>> {
         let index = self.labels.clone().iter()
             .position(|el| el == label)
             .unwrap();
-        self.series((index).to_owned())
+        Some(self.series((index).to_owned()))
     }
 
     fn many(&mut self, labels: Vec<&str>) -> Vec<Series<Element>> {
@@ -115,7 +126,7 @@ impl DataFrameImpl for DataFrame {
     }
 
     fn map(&mut self, col: &str, obj: HashMap<&str, u32>) -> DataFrame {
-        for el in &mut self.by(col).data {
+        for el in &mut self.by(col).unwrap().data {
             for (key, v) in obj.iter() {
                 match el {
                     Element::Text(cell) => {
@@ -161,7 +172,7 @@ impl DataFrameImpl for DataFrame {
         Some(self.to_owned())
     }
 
-    fn contains(self, label: &str) -> bool{
+    fn contains(self, label: &str) -> bool {
         self.labels.contains(&label.to_string())
     }
 
@@ -217,7 +228,7 @@ impl IndexMut<usize> for DataFrame {
 
 impl DataFrameScienceImpl for DataFrame {
     fn get_dummies(&mut self, label: &str) -> DataFrame {
-        let column = self.by(label.clone());
+        let column = self.by(label.clone()).unwrap();
         let unique_column = column.clone().unique();
         let size = unique_column.clone().data.len();
         let columns: Vec<Vec<Element>> = column.data.iter().map(|el| {

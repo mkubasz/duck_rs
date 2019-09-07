@@ -36,9 +36,31 @@ impl Into<String> for Element {
 
 impl Into<u32> for Element {
     fn into(self) -> u32 {
-        unimplemented!()
+        match self {
+            Element::Integer(v) => v as u32,
+            _ => {panic!("Error")}
+        }
     }
 }
+
+impl Into<f32> for Element {
+    fn into(self) -> f32 {
+        match self {
+            Element::Float(v) => v,
+            _ => {panic!("Error")}
+        }
+    }
+}
+
+impl Into<bool> for Element {
+    fn into(self) -> bool {
+        match self {
+            Element::Bool(v) => v,
+            _ => {panic!("Error")}
+        }
+    }
+}
+
 impl From<String> for Element {
     fn from(v: String) -> Self {
         Element::Text(v)
