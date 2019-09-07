@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["sgdclassifier","A two-class logistic regression classifier implemented using stochastic gradient descent."]]});

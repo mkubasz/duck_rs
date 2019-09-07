@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["boston","The Boston house prices dataset."],["iris","The iris dataset."]]});

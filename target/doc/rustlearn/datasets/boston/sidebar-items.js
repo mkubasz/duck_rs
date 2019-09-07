@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["load_data","Load the Boston house prices dataset, returning a tuple of (features, class labels)."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["FactorizationMachine","A two-class factorization machine implemented using stochastic gradient descent."],["Hyperparameters","Hyperparameters for a FactorizationMachine"]]});

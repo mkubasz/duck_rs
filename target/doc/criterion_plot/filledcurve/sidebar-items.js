@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["FilledCurve","Fills the area between two curves"],["Properties","Properties common to filled curve plots"]]});

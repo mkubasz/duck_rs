@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["Configure","Overloaded `configure` method"],["Data","Types that can be plotted"],["Plot","Overloaded `plot` method"],["Set","Overloaded `set` method"]]});

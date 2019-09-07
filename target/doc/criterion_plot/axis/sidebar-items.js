@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Properties","Properties of the coordinate axes"]]});
