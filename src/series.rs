@@ -1,63 +1,70 @@
 use ndarray::{Array1, Array};
 use std::collections::HashSet;
 use crate::element::Element;
+use crate::types::{DInteger, DFloat};
 
 #[derive(Debug, Clone)]
-pub struct Series {
+pub struct Series<T> {
     pub label: String,
-    pub data: Vec<Element>
+    pub data: Vec<T>
 }
 
 pub trait SeriesImpl {
-    fn new() -> Series;
-    fn values(&self) -> Array1<f32>;
+    fn new() -> Series<Element>;
     fn push(&mut self, element: Element);
-    fn unique(&mut self) -> Series;
-    fn len(self) -> usize;
+    fn unique(&mut self) -> Series<Element>;
+    fn contains(self, label: &str) -> bool;
 }
 
-impl SeriesImpl for Series {
-    fn new() -> Series {
+#[derive(Debug, Clone)]
+pub enum TSeries {
+    Text(Series<String>),
+    Number(Series<DInteger>),
+    Float(Series<DFloat>),
+    Bool(Series<bool>)
+}
+
+impl SeriesImpl for Series<Element> {
+    fn new() -> Series<Element> {
         Series {
             label: "".to_string(),
             data: Vec::new()
         }
     }
 
-    /// Convert Data Frame to ndarray
-    fn values(&self) -> Array1<f32> {
-        let mut arr = Array::default(self.data.len());
-        for (index, element) in self.data.iter().enumerate() {
-            arr[index] = element.value.parse().unwrap();
-        }
-        arr
-    }
-
     fn push(&mut self, element: Element) {
         self.data.push(element);
     }
 
-    // fn convert<T: Num>(&self) -> Column {
-    //     let col = self.data.into_iter().map(|p|
-    //         Element::<T>{ value: T::from(p.value) }
-    //     ).collect::();
-    //     col
-    // }
-
-    /// Get unique values in columns
-    fn unique(&mut self) -> Series {
-        let mut unique_values = HashSet::new();
+    fn unique(&mut self) -> Series<Element> {
+        let mut unique_values: HashSet<String> = HashSet::new();
         self.data.iter().for_each(|e| {
-            unique_values.insert(e.clone());
+            match e {
+                Element::Text(cell) => {
+                        unique_values.insert(cell.clone());
+                    },
+                _ => {}
+            }
+
         });
         let mut column = Series::new();
         unique_values.iter().for_each(
-            |el| column.data.push(el.clone())
+            |el| column.data.push(Element::from(el.clone()))
         );
         column
     }
 
-    fn len(self) -> usize {
-        self.data.len()
+    fn contains(self, label: &str) -> bool {
+        for el in self.data {
+            match el {
+                Element::Text(cell) => {
+                    if cell.contains(label) {
+                        return true
+                    }
+                }
+                _ => {}
+            }
+        }
+        return false
     }
 }
