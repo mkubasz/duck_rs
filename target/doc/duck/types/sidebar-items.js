@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["DataTypes",""]],"type":[["DFloat",""],["DInteger",""]]});

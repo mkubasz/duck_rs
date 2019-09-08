@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["TSeries",""]],"struct":[["Series",""]],"trait":[["SeriesImpl",""]]});
