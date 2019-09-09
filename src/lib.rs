@@ -1,5 +1,5 @@
 pub mod types;
-pub mod element;
+pub mod cell;
 #[macro_use]
 pub mod macros;
 pub mod dataframe;
