@@ -1,7 +1,7 @@
-use ndarray::{Array1, Array};
 use std::collections::HashSet;
-use crate::element::Element;
-use crate::types::{DInteger, DFloat};
+
+use crate::cell::Cell;
+use crate::types::{DFloat, DInteger};
 
 #[derive(Debug, Clone)]
 pub struct Series<T> {
@@ -10,9 +10,9 @@ pub struct Series<T> {
 }
 
 pub trait SeriesImpl {
-    fn new() -> Series<Element>;
-    fn push(&mut self, element: Element);
-    fn unique(&mut self) -> Series<Element>;
+    fn new() -> Series<Cell>;
+    fn push(&mut self, element: Cell);
+    fn unique(&mut self) -> Series<Cell>;
     fn contains(self, label: &str) -> bool;
 }
 
@@ -24,23 +24,23 @@ pub enum TSeries {
     Bool(Series<bool>)
 }
 
-impl SeriesImpl for Series<Element> {
-    fn new() -> Series<Element> {
+impl SeriesImpl for Series<Cell> {
+    fn new() -> Series<Cell> {
         Series {
             label: "".to_string(),
             data: Vec::new()
         }
     }
 
-    fn push(&mut self, element: Element) {
+    fn push(&mut self, element: Cell) {
         self.data.push(element);
     }
 
-    fn unique(&mut self) -> Series<Element> {
+    fn unique(&mut self) -> Series<Cell> {
         let mut unique_values: HashSet<String> = HashSet::new();
         self.data.iter().for_each(|e| {
             match e {
-                Element::Text(cell) => {
+                Cell::Text(cell) => {
                         unique_values.insert(cell.clone());
                     },
                 _ => {}
@@ -49,7 +49,7 @@ impl SeriesImpl for Series<Element> {
         });
         let mut column = Series::new();
         unique_values.iter().for_each(
-            |el| column.data.push(Element::from(el.clone()))
+            |el| column.data.push(Cell::from(el.clone()))
         );
         column
     }
@@ -57,7 +57,7 @@ impl SeriesImpl for Series<Element> {
     fn contains(self, label: &str) -> bool {
         for el in self.data {
             match el {
-                Element::Text(cell) => {
+                Cell::Text(cell) => {
                     if cell.contains(label) {
                         return true
                     }

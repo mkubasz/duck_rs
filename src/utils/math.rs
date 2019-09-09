@@ -1,9 +1,7 @@
-use crate::element::Element;
-use crate::series::Series;
-use std::cmp::{min, max};
-use std::cmp::Ordering::Equal;
 use num_traits::float::FloatCore;
 
+use crate::cell::Cell;
+use crate::series::Series;
 
 fn minmax(minmax: &mut (f32, f32), cell: f32) -> () {
     if minmax.0.is_nan() {
@@ -16,12 +14,12 @@ fn minmax(minmax: &mut (f32, f32), cell: f32) -> () {
     }
 }
 
-fn series_minmax(series: Series<Element>) -> (f32, f32) {
+fn series_minmax(series: Series<Cell>) -> (f32, f32) {
     let mut min_max: (f32, f32) = (f32::nan(), f32::nan());
     for el in series.data {
         match el {
-            Element::Integer(cell) => minmax(&mut min_max, cell as f32),
-            Element::Float(cell) => minmax(&mut min_max, cell),
+            Cell::Integer(cell) => minmax(&mut min_max, cell as f32),
+            Cell::Float(cell) => minmax(&mut min_max, cell),
             _ => {}
         }
     }
@@ -31,7 +29,8 @@ fn series_minmax(series: Series<Element>) -> (f32, f32) {
 #[cfg(test)]
 
 mod tests {
-    use crate::dataframe::{DataFrame, DataFrameImpl, DataFrameScienceImpl};
+    use crate::dataframe::DataFrame;
+    use crate::dataframe::operations::Operations;
     use crate::utils::math::series_minmax;
 
     #[test]

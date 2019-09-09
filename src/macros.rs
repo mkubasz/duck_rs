@@ -2,10 +2,10 @@
 macro_rules! row {
     ( $( $x:expr ),* ) => {
         {
-            use crate::element::Element;
-            let mut temp_vec = Vec::<Element>::new();
+            use crate::cell::Cell;
+            let mut temp_vec = Vec::<Cell>::new();
             $(
-                temp_vec.push(Element::from($x));
+                temp_vec.push(Cell::from($x));
             )*
             temp_vec
         }

@@ -1,9 +1,11 @@
 #[cfg(test)]
 
 mod tests {
-    use crate::dataframe::{DataFrame, DataFrameImpl, DataFrameScienceImpl};
-    use std::ops::Deref;
     use std::collections::HashMap;
+
+    use crate::dataframe::DataFrame;
+    use crate::dataframe::operations::Operations;
+    use crate::dataframe::science::Science;
     use crate::series::SeriesImpl;
 
     #[test]
