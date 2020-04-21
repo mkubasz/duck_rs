@@ -181,7 +181,7 @@ impl Index<&str> for DataFrame {
 
     fn index(&self, label: &str) -> &Self::Output {
         for col in &self.data {
-            if col.label == label {
+            if col.label == label.to_string() {
                 return &col;
             }
         }

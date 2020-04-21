@@ -6,3 +6,4 @@ pub mod dataframe;
 pub mod series;
 pub mod tests;
 pub mod utils;
+pub mod math;

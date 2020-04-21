@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use crate::cell::Cell;
-use crate::types::{DFloat, DInteger};
+use crate::types::{DFloat, DInteger, DFloat64};
 
 #[derive(Debug, Clone)]
 pub struct Series<T> {
@@ -21,6 +21,7 @@ pub enum TSeries {
     Text(Series<String>),
     Number(Series<DInteger>),
     Float(Series<DFloat>),
+    Float64(Series<DFloat64>),
     Bool(Series<bool>)
 }
 

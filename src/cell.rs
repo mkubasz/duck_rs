@@ -1,4 +1,4 @@
-use crate::types::{DataTypes, DFloat, DInteger};
+use crate::types::{DataTypes, DFloat, DInteger, DFloat64};
 
 /// Basic elementary cell in data frame
 #[derive(Debug, Clone, PartialEq)]
@@ -6,6 +6,7 @@ pub enum Cell {
     Text(String),
     Integer(i32),
     Float(f32),
+    Float64(f64),
     Bool(bool)
 }
 
@@ -15,6 +16,7 @@ impl Cell {
             Cell::Text(_) => DataTypes::Text,
             Cell::Integer(_) => DataTypes::Integer,
             Cell::Float(_) => DataTypes::Float,
+            Cell::Float64(_) => DataTypes::Float64,
             Cell::Bool(_) => DataTypes::Bool,
             _ => DataTypes::Text
         }
@@ -49,6 +51,15 @@ impl Into<f32> for Cell {
     }
 }
 
+impl Into<f64> for Cell {
+    fn into(self) -> f64 {
+        match self {
+            Cell::Float64(v) => v,
+            _ => {panic!("Error")}
+        }
+    }
+}
+
 impl Into<bool> for Cell {
     fn into(self) -> bool {
         match self {
@@ -73,6 +84,11 @@ impl From<DInteger> for Cell {
 impl From<DFloat> for Cell {
     fn from(v: DFloat) -> Self {
         Cell::Float(v)
+    }
+}
+impl From<DFloat64> for Cell {
+    fn from(v: DFloat64) -> Self {
+        Cell::Float64(v)
     }
 }
 
