@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use crate::cell::Cell;
 use crate::types::{DFloat, DInteger, DFloat64};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Series<T> {
     pub label: String,
     pub data: Vec<T>
@@ -39,8 +39,8 @@ impl SeriesImpl for Series<Cell> {
 
     fn unique(&mut self) -> Series<Cell> {
         let mut unique_values: HashSet<String> = HashSet::new();
-        self.data.iter().for_each(|e| {
-            match e {
+        self.data.iter().for_each(|element| {
+            match element {
                 Cell::Text(cell) => {
                         unique_values.insert(cell.clone());
                     },
@@ -56,16 +56,16 @@ impl SeriesImpl for Series<Cell> {
     }
 
     fn contains(self, label: &str) -> bool {
-        for el in self.data {
-            match el {
+        for element in self.data {
+            match element {
                 Cell::Text(cell) => {
                     if cell.contains(label) {
-                        return true
+                        return true;
                     }
                 }
                 _ => {}
             }
         }
-        return false
+        return false;
     }
 }

@@ -35,8 +35,8 @@ fn minmax<T: Into<f64> + Copy>(series: Vec<T>) -> Option<(f64, f64)> {
 
 fn series_minmax(series: Series<Cell>) -> (f64, f64) {
     let mut min_max: (f64, f64) = (f64::nan(), f64::nan());
-    for el in series.data {
-        match el {
+    for element in series.data {
+        match element {
             Cell::Integer(cell) => {
                 min_max = minmax_item(min_max, cell);
             },

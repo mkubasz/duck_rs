@@ -10,9 +10,12 @@ use crate::dataframe::operations::Operations;
 use crate::dataframe::science::Science;
 use crate::series::{Series, SeriesImpl};
 use crate::types::DataTypes;
+use std::borrow::Borrow;
+use std::cmp::Ordering;
 
 pub mod science;
 pub mod operations;
+pub mod tests_dataframe;
 
 #[derive(Debug, Clone)]
 pub struct DataFrame {
@@ -85,8 +88,12 @@ impl Operations for DataFrame {
     }
 
     fn by(&mut self, label: &str) -> Option<&mut Series<Cell>> {
-        let index = self.labels.clone().iter()
-            .position(|el| el == label)
+        let index = self.labels
+            .clone()
+            .iter()
+            .position(
+                |el| el == label
+            )
             .unwrap();
         Some(self.series((index).to_owned()))
     }
@@ -127,11 +134,15 @@ impl Operations for DataFrame {
         }
     }
 
+
     fn drop(&mut self, labels: Vec<&str>) -> Option<DataFrame> {
         for label in labels {
-            let position = self.labels.clone().iter().position(
+            let position = self.labels
+                .clone()
+                .iter()
+                .position(
                 |el| el == label
-            ).unwrap();
+                ).unwrap();
             self.labels.remove(position);
             self.data.remove(position);
         }
@@ -150,6 +161,66 @@ impl Operations for DataFrame {
 
     fn contains(self, label: &str) -> bool {
         self.labels.contains(&label.to_string())
+    }
+
+    fn join(&mut self, df: DataFrame) {
+        let mut clone_df = df.labels.clone();
+        let mut clone_data = df.data.clone();
+        self.labels.append(&mut clone_df);
+        self.size += df.size;
+        self.data.append(&mut clone_data);
+    }
+
+    fn to_rows(&self) -> Option<Vec<Vec<Cell>>> {
+        let mut el = vec![];
+        for i in 0..self.size {
+            let mut row = row![];
+            for j in 0..self.data.len() {
+                row.push(self.data[j].data[i].clone());
+            }
+            el.push(row);
+        }
+        Some(el.clone())
+    }
+
+    fn group_by(&mut self, label: &str) -> Option<Vec<Cell>> {
+        let el = self.data.clone();
+        let mut cell = row!["f", 2];
+
+        let groups: HashMap<String, Vec<Cell>> = HashMap::new();
+        /*
+             A   B  C
+            dsd  1  f
+            dvc  2  f
+            dsd  3  g
+
+            A
+            dsd
+            dsd
+            dvc
+        */
+        // el.iter().for_each(|el| {
+        //
+        // });
+        // let mut cells = find.data;
+        // cells.sort_by(|cell1, cell2| {
+        //     match cell1 {
+        //         Cell::Text(v1) => {
+        //             match cell2 {
+        //                 Cell::Text(v2) => {
+        //                     v1.cmp(v2)
+        //                 }
+        //                 _ => {
+        //                     Ordering::Equal
+        //                 }
+        //             }
+        //         }
+        //         _ => {
+        //             Ordering::Equal
+        //         }
+        //     }
+        // });
+        None
     }
 
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {

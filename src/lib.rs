@@ -4,6 +4,5 @@ pub mod cell;
 pub mod macros;
 pub mod dataframe;
 pub mod series;
-pub mod tests;
 pub mod utils;
 pub mod math;

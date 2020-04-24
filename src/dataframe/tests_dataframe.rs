@@ -58,9 +58,9 @@ mod tests {
     fn test_index() {
         let mut df = DataFrame::new(
             vec![
-                row![0.4, 0.7, "book", true, 1],
-                row![3.0, 4.7, "poster", true, 1],
-            ],
+                    row![0.4, 0.7, "book", true, 1],
+                    row![3.0, 4.7, "poster", true, 1],
+                 ],
             vec!["A", "B", "C", "D", "E"]
         );
         let series = df["A"].clone();
@@ -105,5 +105,54 @@ mod tests {
         let mut df = DataFrame::read_csv(format!("src/data/Startups.csv")).unwrap();
         let new_df = df.drop(vec!["State"]).unwrap();
         assert_eq!(new_df.contains("State"), false);
+    }
+
+    #[test]
+    fn test_join() {
+        let mut df = DataFrame::new(
+            vec![
+                row![0.4, 0.7, "book", true, 1],
+                row![3.0, 4.7, "poster", true, 1],
+            ],
+            vec!["A", "B", "C", "D", "E"]
+        );
+        let mut df2 = DataFrame::new(
+            vec![
+                row![1.4, 1.7],
+                row![13.0, 13.7],
+            ],
+            vec!["F", "G"]
+        );
+        df.join(df2);
+        assert_eq!(df.contains("G"), true);
+    }
+
+    #[test]
+    fn test_to_rows() {
+        let mut df = DataFrame::new(
+            vec![
+                row![0.4, 0.7, "book", true, 1],
+                row![3.0, 4.7, "poster", true, 1],
+            ],
+            vec!["A", "B", "C", "D", "E"]
+        );
+        let result = df.to_rows().unwrap();
+        assert_eq!(result[0].len(), 5);
+        assert_eq!(result.len(), 2);
+    }
+
+    #[test]
+    fn test_group_by() {
+        let mut df = DataFrame::new(
+            vec![
+                row![0.4, 0.7, "book", true, 1],
+                row![3.0, 4.7, "poster", true, 1],
+                row![3.0, 4.7, "book", true, 1],
+            ],
+            vec!["A", "B", "C", "D", "E"]
+        );
+        let result = df.group_by("C").unwrap();
+        println!("{:?}", result);
+        //assert_eq!(result.contains("G"), true);
     }
 }
