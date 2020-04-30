@@ -184,42 +184,14 @@ impl Operations for DataFrame {
     }
 
     fn group_by(&mut self, label: &str) -> Option<Vec<Cell>> {
-        let el = self.data.clone();
-        let mut cell = row!["f", 2];
-
-        let groups: HashMap<String, Vec<Cell>> = HashMap::new();
-        /*
-             A   B  C
-            dsd  1  f
-            dvc  2  f
-            dsd  3  g
-
-            A
-            dsd
-            dsd
-            dvc
-        */
-        // el.iter().for_each(|el| {
-        //
-        // });
-        // let mut cells = find.data;
-        // cells.sort_by(|cell1, cell2| {
-        //     match cell1 {
-        //         Cell::Text(v1) => {
-        //             match cell2 {
-        //                 Cell::Text(v2) => {
-        //                     v1.cmp(v2)
-        //                 }
-        //                 _ => {
-        //                     Ordering::Equal
-        //                 }
-        //             }
-        //         }
-        //         _ => {
-        //             Ordering::Equal
-        //         }
-        //     }
-        // });
+        let rows = match self.to_rows() {
+            Some(t) => t,
+            None => return None,
+        };
+        let index = self.labels.clone().into_iter().position(|x| &x == label).unwrap();
+        let mut map = HashMap::new();
+        rows.clone().into_iter().for_each(|row| { map.insert(format!("{:?}", row[index].clone()), ""); });
+        println!("{:?}", map);
         None
     }
 
