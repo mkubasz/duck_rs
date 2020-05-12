@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use crate::cell::Cell;
-use crate::dataframe::DataFrame;
+use crate::dataframe::{DataFrame, DataFrameGroupBy};
 use crate::series::Series;
 
 pub trait Operations {
@@ -36,7 +36,9 @@ pub trait Operations {
 
     fn join(&mut self, df: DataFrame);
 
-    fn group_by(&mut self, label: &str) -> Option<Vec<Cell>>;
+    fn group_by(&mut self, label: &str) -> Option<DataFrameGroupBy>;
+
+    fn sort(&mut self, label: &str) -> Option<DataFrame>;
     /// static methods
     /*
         Read data from csv file

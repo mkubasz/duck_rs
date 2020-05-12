@@ -153,6 +153,20 @@ mod tests {
         );
         let result = df.group_by("C").unwrap();
         println!("{:?}", result);
-        //assert_eq!(result.contains("G"), true);
+        assert_eq!(result.contains_key("book"), true);
+    }
+
+    #[test]
+    fn test_sort() {
+        let mut df = DataFrame::new(
+            vec![
+                row![0.4, 0.7, "poster", true, 1],
+                row![3.0, 4.7, "table", true, 1],
+                row![3.0, 4.7, "book", true, 1],
+            ],
+            vec!["A", "B", "C", "D", "E"]
+        );
+        let result = df.sort("C").unwrap();
+        println!("{:?}", result);
     }
 }

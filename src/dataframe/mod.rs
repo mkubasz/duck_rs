@@ -185,11 +185,11 @@ impl Operations for DataFrame {
         Some(el.clone())
     }
 
-    fn group_by(&mut self, label: &str) -> DataFrameGroupBy {
+    fn group_by(&mut self, label: &str) -> Option<DataFrameGroupBy> {
         let mut map: DataFrameGroupBy = HashMap::new();
         let rows = match self.to_rows() {
             Some(t) => t,
-            None => return map,
+            None => return None,
         };
         let index = self.labels.clone().into_iter().position(|x| &x == label).unwrap();
         rows.clone().into_iter().for_each(|row| {
@@ -202,7 +202,30 @@ impl Operations for DataFrame {
             v.push(row);
             map.insert(a.clone(), v);
         });
-        map
+        Some(map)
+    }
+
+    fn sort(&mut self, label: &str) -> Option<DataFrame> {
+        let mut rows = match self.to_rows() {
+            Some(t) => t,
+            None => return None,
+        };
+        let index = self.labels.clone().into_iter().position(|x| &x == label).unwrap();
+        rows.sort_by(|a, b| {
+            match a.get(index).clone().unwrap() {
+                Cell::Text(a1) => {
+                    match b.get(index).clone().unwrap() {
+                        Cell::Text(b1) => {
+                            a1.cmp(&b1)
+                        },
+                        _ => "".cmp(""),
+                    }
+                },
+                _ => "".cmp(""),
+            }
+        });
+        println!("{:?}", rows);
+        None
     }
 
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
