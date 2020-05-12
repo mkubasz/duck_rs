@@ -24,6 +24,8 @@ pub struct DataFrame {
     data: Vec<Series<Cell>>,
 }
 
+type DataFrameGroupBy = HashMap<String, Vec<Vec<Cell>>>;
+
 impl Operations for DataFrame {
     fn new(vec: Vec<Vec<Cell>>, labels: Vec<&str>) -> DataFrame {
         let mut column_types = vec![];
@@ -183,16 +185,24 @@ impl Operations for DataFrame {
         Some(el.clone())
     }
 
-    fn group_by(&mut self, label: &str) -> Option<Vec<Cell>> {
+    fn group_by(&mut self, label: &str) -> DataFrameGroupBy {
+        let mut map: DataFrameGroupBy = HashMap::new();
         let rows = match self.to_rows() {
             Some(t) => t,
-            None => return None,
+            None => return map,
         };
         let index = self.labels.clone().into_iter().position(|x| &x == label).unwrap();
-        let mut map = HashMap::new();
-        rows.clone().into_iter().for_each(|row| { map.insert(format!("{:?}", row[index].clone()), ""); });
-        println!("{:?}", map);
-        None
+        rows.clone().into_iter().for_each(|row| {
+            let a = match row[index].clone() {
+                Cell::Text(x) => x,
+                _ => String::from(""),
+            };
+            if !map.contains_key(&a.clone()) { map.insert( a.clone(), vec![]); }
+            let mut v = map.get(&a.clone()).unwrap().clone();
+            v.push(row);
+            map.insert(a.clone(), v);
+        });
+        map
     }
 
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
