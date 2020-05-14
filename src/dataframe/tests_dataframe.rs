@@ -7,6 +7,7 @@ mod tests {
     use crate::dataframe::operations::Operations;
     use crate::dataframe::science::Science;
     use crate::series::SeriesImpl;
+    use crate::cell::Cell;
 
     #[test]
     fn test_create_dataframe_from_vec() {
@@ -152,7 +153,6 @@ mod tests {
             vec!["A", "B", "C", "D", "E"]
         );
         let result = df.group_by("C").unwrap();
-        println!("{:?}", result);
         assert_eq!(result.contains_key("book"), true);
     }
 
@@ -167,6 +167,20 @@ mod tests {
             vec!["A", "B", "C", "D", "E"]
         );
         let result = df.sort("C").unwrap();
-        println!("{:?}", result);
+        assert_eq!(result.data[2].data[0], Cell::Text("book".to_string()));
+    }
+
+    #[test]
+    fn test_to_matrix() {
+        let mut df = DataFrame::new(
+            vec![
+                row![0.4, 0.7, true, 1],
+                row![3.0, 4.7, true, 1],
+                row![3.0, 4.7, true, 1],
+            ],
+            vec!["A", "B", "D", "E"]
+        );
+        let result = df.to_matrix().unwrap();
+        assert_eq!(result[0][2], 1.0);
     }
 }

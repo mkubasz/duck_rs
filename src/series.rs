@@ -10,7 +10,7 @@ pub struct Series<T> {
 }
 
 pub trait SeriesImpl {
-    fn new() -> Series<Cell>;
+    fn new(data: Vec<Cell>, label: String) -> Series<Cell>;
     fn push(&mut self, element: Cell);
     fn unique(&mut self) -> Series<Cell>;
     fn contains(self, label: &str) -> bool;
@@ -26,10 +26,10 @@ pub enum TSeries {
 }
 
 impl SeriesImpl for Series<Cell> {
-    fn new() -> Series<Cell> {
+    fn new(data: Vec<Cell>, label: String) -> Series<Cell> {
         Series {
-            label: "".to_string(),
-            data: Vec::new()
+            label: label.clone(),
+            data: data.clone()
         }
     }
 
@@ -48,7 +48,7 @@ impl SeriesImpl for Series<Cell> {
             }
 
         });
-        let mut column = Series::new();
+        let mut column = Series::new(Vec::new(), String::from(""));
         unique_values.iter().for_each(
             |el| column.data.push(Cell::from(el.clone()))
         );

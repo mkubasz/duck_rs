@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::ops::{Index, IndexMut};
-
+use std::f64;
 use num::NumCast;
 
 use crate::cell::Cell;
@@ -12,6 +12,7 @@ use crate::series::{Series, SeriesImpl};
 use crate::types::DataTypes;
 use std::borrow::Borrow;
 use std::cmp::Ordering;
+use crate::algebraic::matrix::Matrix;
 
 pub mod science;
 pub mod operations;
@@ -20,8 +21,8 @@ pub mod tests_dataframe;
 #[derive(Debug, Clone)]
 pub struct DataFrame {
     pub size: usize,
-    labels: Vec<String>,
-    data: Vec<Series<Cell>>,
+    pub labels: Vec<String>,
+    pub data: Vec<Series<Cell>>,
 }
 
 type DataFrameGroupBy = HashMap<String, Vec<Vec<Cell>>>;
@@ -224,10 +225,11 @@ impl Operations for DataFrame {
                 _ => "".cmp(""),
             }
         });
-        println!("{:?}", rows);
-        None
+        DataFrame::from_rows(rows, self.labels.clone())
     }
 
+    /// Static methods
+    ///
     fn read_csv(file_name: String) -> Result<DataFrame, Box<dyn Error>> {
         let file = File::open(file_name)?;
         let mut rdr = csv::Reader::from_reader(file);
@@ -302,6 +304,12 @@ impl Science for DataFrame {
         df
     }
 
+    fn from_rows(rows: Vec<Vec<Cell>>, labels: Vec<String>) -> Option<DataFrame> {
+        Some(DataFrame::new(rows, labels.iter().map( |it| {
+            it.as_str()
+        }).collect()))
+    }
+
     fn from_vec<T: NumCast + Copy>(vec: Vec<Vec<T>>, labels: Vec<&str>) -> DataFrame {
         let mut new_vec: Vec<Vec<Cell>> = Vec::new();
         for columns in vec.iter() {
@@ -312,5 +320,34 @@ impl Science for DataFrame {
             new_vec.push(elements);
         }
         DataFrame::new(new_vec.clone(), labels)
+    }
+
+
+    fn to_matrix(&self) -> Option<Matrix> {
+        let mut el = vec![];
+        for i in 0..self.size {
+            let mut row = vec![];
+            for j in 0..self.data.len() {
+                match self.data[j].data[i].clone() {
+                    Cell::Text(value) => {
+                        return None;
+                    }
+                    Cell::Float64(value) => {
+                        row.push(value);
+                    }
+                    Cell::Float(value) => {
+                        row.push(value as f64);
+                    }
+                    Cell::Integer(value) => {
+                        row.push(value as f64);
+                    }
+                    Cell::Bool(value) => {
+                        row.push(if value { 1.0 } else { 0.0 });
+                    }
+                }
+            }
+            el.push(row);
+        }
+        Some(el)
     }
 }
